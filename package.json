@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "bash serve.sh",
-    "start:port": "bash serve.sh 8080"
+    "start:port": "bash serve.sh 8080",
+    "start:dynamic": "python3 serve_dynamic.py"
   }
 }
