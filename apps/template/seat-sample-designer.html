@@ -830,6 +830,9 @@
 
     <div id="panel-viewer" class="hidden">
         <h3>Viewer Mode</h3>
+        <button onclick="setAppMode('edit')" class="btn-primary" style="margin-bottom: 16px;">
+            ← Exit Viewer
+        </button>
         <div class="shortcuts">
             <div class="shortcut-row">
                 <span class="shortcut-desc">Dim Player</span>
@@ -848,18 +851,24 @@
 
     <div id="panel-sample" class="hidden">
         <h3>Sample Collection</h3>
+
+        <div style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 0.75em; color: var(--text-subtle); margin-bottom: 6px; font-weight: 500;">Sample Type</label>
+            <select id="sample-type-choice" style="width: 100%; background: var(--bg-color); border: 1px solid var(--border); color: var(--text-color); padding: 10px; border-radius: var(--radius-sm); font-size: 0.9em; margin-bottom: 8px;">
+                <option value="environmental">Environmental Test (▲)</option>
+                <option value="photo">Photo Documentation (■)</option>
+            </select>
+            <button id="btn-take-sample" class="btn-primary" onclick="startTakingSample()" style="width: 100%;">
+                📍 Take Sample
+            </button>
+        </div>
+
         <div class="tool-grid">
             <button id="btn-sample-select" class="tool-btn active" onclick="setTool('select')">
                 <span class="icon">👆</span> Select
             </button>
-            <button id="btn-sample-env" class="tool-btn" onclick="setTool('add_env_sample')">
-                <span class="icon">▲</span> Test Site
-            </button>
-            <button id="btn-sample-photo" class="tool-btn" onclick="setTool('add_photo')">
-                <span class="icon">■</span> Photo
-            </button>
-            <button id="btn-sample-delete" class="tool-btn danger" onclick="deleteSelected()">
-                <span class="icon">🗑</span> Delete
+            <button id="btn-sample-delete" class="tool-btn danger full-width" onclick="deleteSelected()">
+                <span class="icon">🗑</span> Delete Selected
             </button>
         </div>
 
@@ -1155,6 +1164,9 @@
         panelSample.classList.add('hidden');
         panelViewer.classList.add('hidden');
 
+        // Get settings row
+        const settingsRow = document.querySelector('.settings-row');
+
         if (mode === 'view') {
             // Hide sidebar completely in viewer mode
             sidebar.style.display = 'none';
@@ -1166,12 +1178,16 @@
                 panelTools.classList.remove('hidden');
                 document.getElementById('props-panel').style.opacity = '1';
                 document.getElementById('props-panel').style.pointerEvents = 'auto';
+                // Show settings in edit mode
+                if (settingsRow) settingsRow.style.display = 'flex';
             } else if (mode === 'sample') {
                 panelSample.classList.remove('hidden');
                 document.getElementById('props-panel').style.opacity = '1';
                 document.getElementById('props-panel').style.pointerEvents = 'auto';
                 updateBudgetDisplay();
                 updateSampleList();
+                // Hide grid size in sample mode
+                if (settingsRow) settingsRow.style.display = 'none';
             }
         }
         renderScene();
@@ -1416,7 +1432,7 @@
     function addEnvSample(x, y) {
         const label = `S${nextEnvSampleNum}`;
         nextEnvSampleNum++;
-        samples.push({
+        const newSample = {
             id: `sample_${Date.now()}`,
             type: 'environmental',
             x, y,
@@ -1425,26 +1441,54 @@
             testType: 'Culture',
             cost: 10,
             notes: ''
-        });
+        };
+        samples.push(newSample);
+
+        // Reset the take sample button
+        const btn = document.getElementById('btn-take-sample');
+        if (btn) {
+            btn.textContent = '📍 Take Sample';
+            btn.style.background = '';
+        }
+
+        // Auto-select the new sample
+        selection = [{ type: 'sample', index: samples.length - 1 }];
+
+        setTool('select');
         renderScene();
         updateBudgetDisplay();
         updateSampleList();
+        populateProps();
     }
 
     function addPhotoMarker(x, y) {
         const label = `P${nextPhotoNum}`;
         nextPhotoNum++;
-        samples.push({
+        const newSample = {
             id: `photo_${Date.now()}`,
             type: 'photo',
             x, y,
             label,
             cost: 0,
             notes: ''
-        });
+        };
+        samples.push(newSample);
+
+        // Reset the take sample button
+        const btn = document.getElementById('btn-take-sample');
+        if (btn) {
+            btn.textContent = '📍 Take Sample';
+            btn.style.background = '';
+        }
+
+        // Auto-select the new sample
+        selection = [{ type: 'sample', index: samples.length - 1 }];
+
+        setTool('select');
         renderScene();
         updateBudgetDisplay();
         updateSampleList();
+        populateProps();
     }
 
     function getTestCost(testType) {
@@ -1490,16 +1534,22 @@
         if (envSamples.length > 0) {
             html += '<div style="margin-bottom: 12px;"><strong style="color: var(--accent);">Environmental Tests</strong></div>';
             envSamples.forEach((s, idx) => {
+                const sampleIndex = samples.indexOf(s);
+                const color = getTestTypeColor(s.testType);
                 html += `
-                    <div style="padding: 8px; margin-bottom: 6px; background: var(--panel-bg); border-radius: var(--radius-sm); border-left: 3px solid var(--accent); cursor: pointer;"
-                         onclick="selectSample(${samples.indexOf(s)})">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <strong>${s.label}</strong>
-                            <span style="color: var(--text-muted); font-size: 0.9em;">$${s.cost}</span>
+                    <div style="padding: 8px; margin-bottom: 6px; background: var(--panel-bg); border-radius: var(--radius-sm); border-left: 3px solid ${color}; position: relative;">
+                        <div onclick="selectSample(${sampleIndex})" style="cursor: pointer; padding-right: 30px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <strong>${s.label}</strong>
+                                <span style="color: var(--text-muted); font-size: 0.9em;">$${s.cost}</span>
+                            </div>
+                            <div style="color: var(--text-subtle); font-size: 0.8em; margin-top: 2px;">
+                                ${s.sampleType} · ${s.testType}
+                            </div>
                         </div>
-                        <div style="color: var(--text-subtle); font-size: 0.8em; margin-top: 2px;">
-                            ${s.sampleType} · ${s.testType}
-                        </div>
+                        <button onclick="deleteSampleByIndex(${sampleIndex}); event.stopPropagation();"
+                                style="position: absolute; top: 8px; right: 8px; background: var(--danger); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 0.8em; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1;"
+                                title="Delete sample">×</button>
                     </div>
                 `;
             });
@@ -1508,13 +1558,18 @@
         if (photos.length > 0) {
             html += '<div style="margin: 12px 0;"><strong style="color: var(--accent-secondary);">Photos</strong></div>';
             photos.forEach((s, idx) => {
+                const sampleIndex = samples.indexOf(s);
                 html += `
-                    <div style="padding: 8px; margin-bottom: 6px; background: var(--panel-bg); border-radius: var(--radius-sm); border-left: 3px solid var(--accent-secondary); cursor: pointer;"
-                         onclick="selectSample(${samples.indexOf(s)})">
-                        <strong>${s.label}</strong>
-                        <div style="color: var(--text-subtle); font-size: 0.8em; margin-top: 2px;">
-                            Photo Documentation (Free)
+                    <div style="padding: 8px; margin-bottom: 6px; background: var(--panel-bg); border-radius: var(--radius-sm); border-left: 3px solid var(--accent-secondary); position: relative;">
+                        <div onclick="selectSample(${sampleIndex})" style="cursor: pointer; padding-right: 30px;">
+                            <strong>${s.label}</strong>
+                            <div style="color: var(--text-subtle); font-size: 0.8em; margin-top: 2px;">
+                                Photo Documentation (Free)
+                            </div>
                         </div>
+                        <button onclick="deleteSampleByIndex(${sampleIndex}); event.stopPropagation();"
+                                style="position: absolute; top: 8px; right: 8px; background: var(--danger); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 0.8em; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1;"
+                                title="Delete sample">×</button>
                     </div>
                 `;
             });
@@ -1527,6 +1582,37 @@
         selection = [{ type: 'sample', index }];
         renderScene();
         populateProps();
+    }
+
+    function deleteSampleByIndex(index) {
+        samples.splice(index, 1);
+        selection = [];
+        renderScene();
+        populateProps();
+        updateBudgetDisplay();
+        updateSampleList();
+    }
+
+    function getTestTypeColor(testType) {
+        const colors = {
+            'PCR': '#a855f7',      // Purple
+            'Culture': '#ec4899',   // Pink
+            'Rapid': '#3b82f6'      // Blue
+        };
+        return colors[testType] || 'var(--accent)';
+    }
+
+    function startTakingSample() {
+        const sampleTypeChoice = document.getElementById('sample-type-choice').value;
+        if (sampleTypeChoice === 'environmental') {
+            setTool('add_env_sample');
+        } else {
+            setTool('add_photo');
+        }
+        // Update button to show active state
+        const btn = document.getElementById('btn-take-sample');
+        btn.textContent = '📍 Click on canvas to place sample';
+        btn.style.background = 'var(--warning)';
     }
 
     function finishPoly() {
@@ -1715,9 +1801,10 @@
                 const points = `${s.x},${s.y - size} ${s.x - size},${s.y + size} ${s.x + size},${s.y + size}`;
                 const triangle = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
                 triangle.setAttribute('points', points);
-                triangle.setAttribute('fill', 'var(--accent)');
-                triangle.setAttribute('fill-opacity', '0.7');
-                triangle.setAttribute('stroke', isSelected ? 'white' : 'var(--accent)');
+                const testColor = getTestTypeColor(s.testType);
+                triangle.setAttribute('fill', testColor);
+                triangle.setAttribute('fill-opacity', '0.8');
+                triangle.setAttribute('stroke', isSelected ? 'white' : testColor);
                 triangle.setAttribute('stroke-width', isSelected ? '3' : '2');
                 triangle.setAttribute('class', 'sample-node');
                 triangle.setAttribute('data-type', 'sample');
@@ -2057,6 +2144,9 @@
         inputs.playerFields.classList.add('hidden');
         inputs.sampleFields.classList.add('hidden');
 
+        // Find the Basic Info section
+        const basicInfoSection = propsForm.querySelector('.props-section');
+
         if (isPlayer) {
             const p = players[first.index];
             inputs.id.value = p.section_id || '';
@@ -2068,11 +2158,16 @@
             inputs.history.value = p.history || '';
             inputs.playerFields.classList.remove('hidden');
             renderSymptomList(p.symptoms || []);
+            // Show Basic Info for players
+            if (basicInfoSection) basicInfoSection.style.display = 'block';
         } else if (isSample) {
             const s = samples[first.index];
             inputs.id.value = s.label || '';
             inputs.name.value = s.label || '';
             inputs.sampleFields.classList.remove('hidden');
+
+            // Hide Basic Info for samples
+            if (basicInfoSection) basicInfoSection.style.display = 'none';
 
             if (s.type === 'environmental') {
                 inputs.sampleType.value = s.sampleType || 'Air';
@@ -2091,6 +2186,8 @@
             inputs.id.value = s.id || '';
             inputs.name.value = s.name || '';
             inputs.color.value = s.color || '#6366f1';
+            // Show Basic Info for sections
+            if (basicInfoSection) basicInfoSection.style.display = 'block';
         }
     }
 
