@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Outbreak Activity — Apps</title>
+  <style>
+    :root{--bg:#0f1720;--card:#0b1220;--accent:#c9a227;--muted:#9aa3ad;--text:#e6e9ed}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;min-height:100vh;margin:0;background:linear-gradient(180deg,#071023, #0f1720);color:var(--text);display:flex;align-items:center;justify-content:center;padding:48px}
+    .wrap{max-width:920px;width:100%}
+    header{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:24px}
+    h1{font-size:20px;color:var(--accent);margin:0}
+    p{color:var(--muted);margin:0}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+    .card{background:var(--card);border:1px solid rgba(201,162,39,0.08);padding:18px;border-radius:10px;text-decoration:none;color:inherit;box-shadow:0 6px 20px rgba(2,6,23,0.6);transition:transform .12s ease}
+    .card:hover{transform:translateY(-6px)}
+    .card h3{margin:0 0 6px 0;font-size:1.05rem;color:var(--text)}
+    .card p{margin:0;color:var(--muted);font-size:0.92rem}
+    footer{margin-top:26px;color:var(--muted);font-size:0.9rem}
+    .small{font-size:0.85rem;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Outbreak Activity — Apps</h1>
+        <p class="small">Quick links to the local webapps in this workspace</p>
+      </div>
+      <div class="small">See <a href="/README.md" style="color:var(--accent)">README</a> for details</div>
+    </header>
+
+    <main>
+      <div class="grid">
+        <a class="card" href="/apps/dialogue-player/">
+          <h3>Dialogue Player</h3>
+          <p>Play interactive dialogue scenarios and view decision reports.</p>
+        </a>
+
+        <a class="card" href="/apps/dialogue-editor/">
+          <h3>Dialogue Editor</h3>
+          <p>Create and export dialogue JSON used by the player.</p>
+        </a>
+
+        <a class="card" href="/apps/seat-sample-designer/">
+          <h3>Seat / Sample Designer</h3>
+          <p>Design seating/sample maps, place players, and export data.</p>
+        </a>
+
+        <a class="card" href="/apps/template/">
+          <h3>Template</h3>
+          <p>Master template files — copy to create new apps.</p>
+        </a>
+      </div>
+    </main>
+
+    <footer>
+      <div>Serves the `apps/` folder. Run <code>./serve.sh</code> and open <code>http://localhost:8000/</code>.</div>
+    </footer>
+  </div>
+</body>
+</html>
