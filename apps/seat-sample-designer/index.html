@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Orchestra Layout Designer</title>
+    <title>Outbreak Investigation Designer</title>
     <style>
         :root {
             --bg-color: #1a1a1a;
@@ -12,19 +12,51 @@
             --border: #444;
             --grid-line: #333;
             --select-box: rgba(0, 210, 255, 0.2);
+            --budget-ok: #4ade80;
+            --budget-warning: #fbbf24;
+            --budget-danger: #ef4444;
         }
-        body { margin: 0; background: var(--bg-color); color: var(--text-color); font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; overflow: hidden; user-select: none; }
-        
+        body { margin: 0; background: var(--bg-color); color: var(--text-color); font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden; user-select: none; }
+
+        /* Mode Tabs */
+        .mode-tabs {
+            display: flex;
+            background: var(--panel-bg);
+            border-bottom: 2px solid var(--border);
+            padding: 0;
+            z-index: 30;
+        }
+        .mode-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background: #222;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.2s;
+            border-right: 1px solid var(--border);
+        }
+        .mode-tab:hover { background: #2a2a2a; color: #aaa; }
+        .mode-tab.active { background: var(--panel-bg); color: var(--accent); border-bottom: 3px solid var(--accent); }
+
+        /* Main Content Area */
+        .main-content { display: flex; flex: 1; overflow: hidden; }
+
         /* Sidebar Tools */
-        .sidebar { 
-            width: 320px; /* Widened for more data fields */
-            background: var(--panel-bg); 
-            border-right: 1px solid var(--border); 
-            display: flex; flex-direction: column; 
-            padding: 15px; box-sizing: border-box; 
-            z-index: 20; 
+        .sidebar {
+            width: 320px;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column;
+            padding: 15px; box-sizing: border-box;
+            z-index: 20;
             overflow-y: auto;
+            transition: transform 0.3s;
         }
+        .sidebar.hidden { transform: translateX(-100%); width: 0; padding: 0; }
         .sidebar h3 { margin-top: 0; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 10px; font-size: 1.1em; }
         
         button {
@@ -46,6 +78,59 @@
         .row { display: flex; gap: 10px; }
         .row > div { flex: 1; }
 
+        /* Budget Display */
+        .budget-display {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 2px solid var(--border);
+        }
+        .budget-amount {
+            font-size: 2em;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .budget-amount.ok { color: var(--budget-ok); }
+        .budget-amount.warning { color: var(--budget-warning); }
+        .budget-amount.danger { color: var(--budget-danger); }
+        .budget-bar {
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .budget-bar-fill {
+            height: 100%;
+            transition: all 0.3s;
+            border-radius: 4px;
+        }
+
+        /* Sample List */
+        .sample-list {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #1a1a1a;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .sample-item {
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sample-item:hover { background: #2a2a2a; }
+        .sample-item.selected { background: #1a3a4a; border-left: 3px solid var(--accent); }
+        .sample-label { font-weight: bold; color: var(--accent); }
+        .sample-cost { color: #4ade80; font-weight: 600; }
+
         /* Main Canvas Area */
         #canvas-area { flex: 1; position: relative; overflow: hidden; background: #151515; cursor: default; }
         
@@ -65,10 +150,30 @@
         .poly-finished { stroke-width: 2; transition: opacity 0.2s; cursor: pointer; vector-effect: non-scaling-stroke; }
         .poly-finished:hover { opacity: 0.8; }
         .poly-selected { stroke: #fff !important; stroke-dasharray: 8,4; stroke-width: 3; }
-        
+
         .player-node { stroke: #fff; stroke-width: 1; transition: r 0.1s; cursor: pointer; vector-effect: non-scaling-stroke; }
         .player-node:hover { stroke-width: 2; }
         .player-selected { stroke: var(--accent); stroke-width: 3; fill: #fff !important; }
+
+        /* Sample Nodes */
+        .sample-node { stroke: #fff; stroke-width: 2; cursor: pointer; vector-effect: non-scaling-stroke; transition: all 0.2s; }
+        .sample-node:hover { stroke-width: 3; filter: brightness(1.3); }
+        .sample-selected { stroke: var(--accent); stroke-width: 4; filter: brightness(1.5); }
+
+        /* Tooltip */
+        .tooltip {
+            position: fixed;
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            pointer-events: none;
+            z-index: 1000;
+            white-space: nowrap;
+            border: 1px solid var(--accent);
+            display: none;
+        }
 
         .selection-rect { fill: var(--select-box); stroke: var(--accent); stroke-width: 1; pointer-events: none; vector-effect: non-scaling-stroke; }
 
@@ -90,97 +195,174 @@
 </head>
 <body>
 
-    <!-- LEFT SIDEBAR: Tools -->
-    <div class="sidebar">
-        <h3>Toolbox</h3>
-        <div class="control-group">
-            <button id="btn-select" class="active" onclick="setMode('select')">👆 Select / Move / Drag</button>
-            <button id="btn-poly" onclick="setMode('draw_poly')">⬠ Draw Section</button>
-            <button id="btn-player" onclick="setMode('add_player')">● Add Player</button>
-            <button id="btn-delete" onclick="deleteSelected()" style="background: #522; border-color: #844;">🗑 Delete Selected</button>
-        </div>
+    <!-- MODE TABS -->
+    <div class="mode-tabs">
+        <button class="mode-tab active" onclick="switchAppMode('edit')">EDIT</button>
+        <button class="mode-tab" onclick="switchAppMode('sample')">SAMPLE</button>
+        <button class="mode-tab" onclick="switchAppMode('viewer')">VIEWER</button>
+    </div>
 
-        <div class="control-group">
-            <label>Grid Snapping (px)</label>
-            <input type="number" id="grid-size" value="20" min="5" max="100" onchange="updateGrid()">
-            <div class="hint">Hold Space + Drag to Pan</div>
-        </div>
-
-        <h3>Properties</h3>
-        <div id="props-panel">
-            <p id="no-selection-msg" style="color: #666; font-style: italic;">Select an item to edit...</p>
-            
-            <div id="props-form" class="hidden">
+    <div class="main-content">
+        <!-- LEFT SIDEBAR: Tools -->
+        <div class="sidebar" id="sidebar">
+            <!-- EDIT MODE CONTENT -->
+            <div id="edit-mode-sidebar">
+                <h3>Toolbox</h3>
                 <div class="control-group">
-                    <label>Section Assignment / ID</label>
-                    <input type="text" id="prop-id" placeholder="ID or Section ID">
-                    
-                    <label>Display Name</label>
-                    <input type="text" id="prop-name" placeholder="Name">
+                    <button id="btn-select" class="active" onclick="setMode('select')">👆 Select / Move / Drag</button>
+                    <button id="btn-poly" onclick="setMode('draw_poly')">⬠ Draw Section</button>
+                    <button id="btn-player" onclick="setMode('add_player')">● Add Player</button>
+                    <button id="btn-delete" onclick="deleteSelected()" style="background: #522; border-color: #844;">🗑 Delete Selected</button>
+                </div>
 
-                    <!-- Player Specific Fields -->
-                    <div id="player-fields" class="hidden">
-                        <div class="row">
-                            <div>
-                                <label>Age</label>
-                                <input type="number" id="prop-age" min="0">
+                <div class="control-group">
+                    <label>Grid Snapping (px)</label>
+                    <input type="number" id="grid-size" value="20" min="5" max="100" onchange="updateGrid()">
+                    <div class="hint">Hold Space + Drag to Pan</div>
+                </div>
+
+                <h3>Properties</h3>
+                <div id="props-panel">
+                    <p id="no-selection-msg" style="color: #666; font-style: italic;">Select an item to edit...</p>
+
+                    <div id="props-form" class="hidden">
+                        <div class="control-group">
+                            <label>Section Assignment / ID</label>
+                            <input type="text" id="prop-id" placeholder="ID or Section ID">
+
+                            <label>Display Name</label>
+                            <input type="text" id="prop-name" placeholder="Name">
+
+                            <!-- Player Specific Fields -->
+                            <div id="player-fields" class="hidden">
+                                <div class="row">
+                                    <div>
+                                        <label>Age</label>
+                                        <input type="number" id="prop-age" min="0">
+                                    </div>
+                                    <div>
+                                        <label>Status</label>
+                                        <select id="prop-status">
+                                            <option value="true">Alive</option>
+                                            <option value="false">Deceased</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <label>Symptomatic</label>
+                                <select id="prop-symptomatic">
+                                    <option value="false">No</option>
+                                    <option value="true">Yes</option>
+                                </select>
+
+                                <label>Medical History</label>
+                                <textarea id="prop-history" placeholder="Enter history..."></textarea>
                             </div>
-                            <div>
-                                <label>Status</label>
-                                <select id="prop-status">
-                                    <option value="true">Alive</option>
-                                    <option value="false">Deceased</option>
+
+                            <label>Color</label>
+                            <input type="color" id="prop-color" value="#4facfe">
+                            <div class="hint">Section Color OR Player Override</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: auto;">
+                    <button onclick="openImportModal()" style="background: #444; color: #fff; font-weight: bold; width: 100%; margin-bottom: 10px;">IMPORT JSON</button>
+                    <button onclick="exportData()" style="background: var(--accent); color: #000; font-weight: bold; width: 100%;">EXPORT JSON</button>
+                </div>
+            </div>
+
+            <!-- SAMPLE MODE CONTENT -->
+            <div id="sample-mode-sidebar" class="hidden">
+                <h3>Budget Tracker</h3>
+                <div class="budget-display">
+                    <div style="text-align: center; color: #888; font-size: 0.9em;">Spent / Budget</div>
+                    <div class="budget-amount ok" id="budget-display">$0 / $1500</div>
+                    <div class="budget-bar">
+                        <div class="budget-bar-fill" id="budget-bar" style="width: 0%; background: var(--budget-ok);"></div>
+                    </div>
+                </div>
+
+                <h3>Sample Tools</h3>
+                <div class="control-group">
+                    <button id="btn-sample-select" class="active" onclick="setSampleMode('select')">👆 Select / Move</button>
+                    <button id="btn-sample-test" onclick="setSampleMode('add_test')">▲ Add Test Site</button>
+                    <button id="btn-sample-photo" onclick="setSampleMode('add_photo')">■ Add Photo</button>
+                    <button id="btn-sample-delete" onclick="deleteSelected()" style="background: #522; border-color: #844;">🗑 Delete Selected</button>
+                </div>
+
+                <h3>Sample Properties</h3>
+                <div id="sample-props-panel">
+                    <p id="sample-no-selection-msg" style="color: #666; font-style: italic;">Select a sample to edit...</p>
+
+                    <div id="sample-props-form" class="hidden">
+                        <div class="control-group">
+                            <label>Sample ID</label>
+                            <input type="text" id="sample-prop-label" readonly style="background: #1a1a1a;">
+
+                            <div id="test-fields" class="hidden">
+                                <label>Test Type</label>
+                                <select id="sample-prop-test-type" onchange="updateSampleCost()">
+                                    <option value="culture">Culture ($10)</option>
+                                    <option value="rapid">Rapid ($50)</option>
+                                    <option value="pcr">PCR ($500)</option>
+                                </select>
+
+                                <label>Sample Type</label>
+                                <select id="sample-prop-sample-type">
+                                    <option value="air">Air</option>
+                                    <option value="surface">Surface</option>
+                                    <option value="water">Water</option>
                                 </select>
                             </div>
+
+                            <label>Notes / Rationale</label>
+                            <textarea id="sample-prop-notes" placeholder="Why this location? What are you testing for?"></textarea>
                         </div>
-                        
-                        <label>Symptomatic</label>
-                        <select id="prop-symptomatic">
-                            <option value="false">No</option>
-                            <option value="true">Yes</option>
-                        </select>
-
-                        <label>Medical History</label>
-                        <textarea id="prop-history" placeholder="Enter history..."></textarea>
                     </div>
+                </div>
 
-                    <label>Color</label>
-                    <input type="color" id="prop-color" value="#4facfe">
-                    <div class="hint">Section Color OR Player Override</div>
+                <h3>Sample List</h3>
+                <div class="sample-list" id="sample-list">
+                    <p style="padding: 20px; color: #666; text-align: center; font-style: italic;">No samples placed yet</p>
+                </div>
+
+                <div style="margin-top: auto;">
+                    <button onclick="openImportModal()" style="background: #444; color: #fff; font-weight: bold; width: 100%; margin-bottom: 10px;">IMPORT JSON</button>
+                    <button onclick="exportData()" style="background: var(--accent); color: #000; font-weight: bold; width: 100%;">EXPORT JSON</button>
                 </div>
             </div>
         </div>
 
-        <div style="margin-top: auto;">
-            <button onclick="openImportModal()" style="background: #444; color: #fff; font-weight: bold; width: 100%; margin-bottom: 10px;">IMPORT JSON</button>
-            <button onclick="exportData()" style="background: var(--accent); color: #000; font-weight: bold; width: 100%;">EXPORT JSON</button>
+        <!-- MAIN CANVAS -->
+        <div id="canvas-area">
+            <svg id="stage">
+                <defs>
+                    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#222" stroke-width="1"/>
+                    </pattern>
+                </defs>
+                <!-- Viewport Group for Zoom/Pan -->
+                <g id="viewport">
+                    <rect id="bg-rect" x="-5000" y="-5000" width="10000" height="10000" fill="url(#grid)" />
+                    <g id="layer-polys"></g>
+                    <g id="layer-draft"></g>
+                    <g id="layer-players"></g>
+                    <g id="layer-samples"></g>
+                    <g id="layer-ui"></g> <!-- Selection Box -->
+                </g>
+            </svg>
+
+            <div id="zoom-controls">
+                <button class="zoom-btn" onclick="applyZoom(1.2)" title="Zoom In">+</button>
+                <button class="zoom-btn" onclick="applyZoom(0.8)" title="Zoom Out">-</button>
+                <button class="zoom-btn" onclick="resetZoom()" title="Reset View" style="font-size: 0.8em">R</button>
+            </div>
         </div>
     </div>
 
-    <!-- MAIN CANVAS -->
-    <div id="canvas-area">
-        <svg id="stage">
-            <defs>
-                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#222" stroke-width="1"/>
-                </pattern>
-            </defs>
-            <!-- Viewport Group for Zoom/Pan -->
-            <g id="viewport">
-                <rect id="bg-rect" x="-5000" y="-5000" width="10000" height="10000" fill="url(#grid)" />
-                <g id="layer-polys"></g>
-                <g id="layer-draft"></g>
-                <g id="layer-players"></g>
-                <g id="layer-ui"></g> <!-- Selection Box -->
-            </g>
-        </svg>
-
-        <div id="zoom-controls">
-            <button class="zoom-btn" onclick="applyZoom(1.2)" title="Zoom In">+</button>
-            <button class="zoom-btn" onclick="applyZoom(0.8)" title="Zoom Out">-</button>
-            <button class="zoom-btn" onclick="resetZoom()" title="Reset View" style="font-size: 0.8em">R</button>
-        </div>
-    </div>
+    <!-- TOOLTIP -->
+    <div class="tooltip" id="tooltip"></div>
 
     <!-- JSON OUTPUT MODAL -->
     <div id="output-modal">
@@ -210,15 +392,26 @@
 
 <script>
     // --- STATE ---
-    let mode = 'select'; 
+    let appMode = 'edit'; // 'edit', 'sample', 'viewer'
+    let mode = 'select';
     let gridSize = 20;
-    
+
     let sections = [];
     let players = [];
-    
+    let samples = []; // New: environmental test sites and photos
+
+    // Budget tracking
+    const BUDGET_MAX = 1500;
+    const TEST_COSTS = {
+        culture: 10,
+        rapid: 50,
+        pcr: 500,
+        photo: 0
+    };
+
     // Selection
     let selection = [];
-    
+
     // Draft
     let draftPoints = [];
 
@@ -243,10 +436,12 @@
     const viewport = document.getElementById('viewport');
     const layerPolys = document.getElementById('layer-polys');
     const layerPlayers = document.getElementById('layer-players');
+    const layerSamples = document.getElementById('layer-samples');
     const layerDraft = document.getElementById('layer-draft');
     const layerUI = document.getElementById('layer-ui');
-    
-    // Inputs
+    const tooltip = document.getElementById('tooltip');
+
+    // Inputs - Edit Mode
     const propsForm = document.getElementById('props-form');
     const noSelectMsg = document.getElementById('no-selection-msg');
     const inputs = {
@@ -260,10 +455,214 @@
         playerFields: document.getElementById('player-fields')
     };
 
+    // Inputs - Sample Mode
+    const samplePropsForm = document.getElementById('sample-props-form');
+    const sampleNoSelectMsg = document.getElementById('sample-no-selection-msg');
+    const sampleInputs = {
+        label: document.getElementById('sample-prop-label'),
+        testType: document.getElementById('sample-prop-test-type'),
+        sampleType: document.getElementById('sample-prop-sample-type'),
+        notes: document.getElementById('sample-prop-notes'),
+        testFields: document.getElementById('test-fields')
+    };
+
     // --- INITIALIZATION ---
     updateGrid();
     setupEventHandlers();
     setupAutoUpdate();
+    switchAppMode('edit');
+
+    // --- APP MODE SWITCHING ---
+    function switchAppMode(newMode) {
+        appMode = newMode;
+
+        // Update tab buttons
+        document.querySelectorAll('.mode-tab').forEach(tab => tab.classList.remove('active'));
+        event.target.classList.add('active');
+
+        // Show/hide sidebars
+        const editSidebar = document.getElementById('edit-mode-sidebar');
+        const sampleSidebar = document.getElementById('sample-mode-sidebar');
+        const sidebar = document.getElementById('sidebar');
+
+        editSidebar.classList.add('hidden');
+        sampleSidebar.classList.add('hidden');
+
+        if (newMode === 'edit') {
+            editSidebar.classList.remove('hidden');
+            sidebar.classList.remove('hidden');
+            setMode('select');
+        } else if (newMode === 'sample') {
+            sampleSidebar.classList.remove('hidden');
+            sidebar.classList.remove('hidden');
+            setSampleMode('select');
+            updateBudgetDisplay();
+        } else if (newMode === 'viewer') {
+            sidebar.classList.add('hidden');
+        }
+
+        selection = [];
+        renderScene();
+    }
+
+    // --- SAMPLE MODE FUNCTIONS ---
+    function setSampleMode(newMode) {
+        mode = newMode;
+        document.querySelectorAll('#sample-mode-sidebar .control-group button').forEach(b => b.classList.remove('active'));
+        if(newMode === 'select') document.getElementById('btn-sample-select').classList.add('active');
+        if(newMode === 'add_test') document.getElementById('btn-sample-test').classList.add('active');
+        if(newMode === 'add_photo') document.getElementById('btn-sample-photo').classList.add('active');
+
+        selection = [];
+        renderScene();
+        populateSampleProps();
+    }
+
+    function addSample(x, y, type) {
+        const testCount = samples.filter(s => s.type === 'test').length;
+        const photoCount = samples.filter(s => s.type === 'photo').length;
+
+        const sample = {
+            id: samples.length + 1,
+            type: type, // 'test' or 'photo'
+            x: x,
+            y: y,
+            label: type === 'test' ? `S${testCount + 1}` : `P${photoCount + 1}`,
+            testType: type === 'test' ? 'culture' : null,
+            sampleType: type === 'test' ? 'air' : null,
+            notes: '',
+            cost: type === 'test' ? TEST_COSTS.culture : 0
+        };
+
+        samples.push(sample);
+        updateBudgetDisplay();
+        updateSampleList();
+        renderScene();
+    }
+
+    function calculateTotalCost() {
+        return samples.reduce((sum, s) => sum + (s.cost || 0), 0);
+    }
+
+    function updateBudgetDisplay() {
+        const total = calculateTotalCost();
+        const percent = (total / BUDGET_MAX) * 100;
+
+        const display = document.getElementById('budget-display');
+        const bar = document.getElementById('budget-bar');
+
+        display.textContent = `$${total} / $${BUDGET_MAX}`;
+        bar.style.width = `${Math.min(percent, 100)}%`;
+
+        // Color coding
+        display.classList.remove('ok', 'warning', 'danger');
+        if (total >= BUDGET_MAX) {
+            display.classList.add('danger');
+            bar.style.background = 'var(--budget-danger)';
+        } else if (total >= BUDGET_MAX * 0.8) {
+            display.classList.add('warning');
+            bar.style.background = 'var(--budget-warning)';
+        } else {
+            display.classList.add('ok');
+            bar.style.background = 'var(--budget-ok)';
+        }
+    }
+
+    function updateSampleList() {
+        const listContainer = document.getElementById('sample-list');
+
+        if (samples.length === 0) {
+            listContainer.innerHTML = '<p style="padding: 20px; color: #666; text-align: center; font-style: italic;">No samples placed yet</p>';
+            return;
+        }
+
+        listContainer.innerHTML = '';
+        samples.forEach((sample, index) => {
+            const item = document.createElement('div');
+            item.className = 'sample-item';
+            const isSelected = selection.some(s => s.type === 'sample' && s.index === index);
+            if (isSelected) item.classList.add('selected');
+
+            const info = document.createElement('div');
+            const label = document.createElement('div');
+            label.className = 'sample-label';
+            label.textContent = sample.label;
+
+            const details = document.createElement('div');
+            details.style.fontSize = '0.8em';
+            details.style.color = '#888';
+            if (sample.type === 'test') {
+                details.textContent = `${sample.testType.toUpperCase()} - ${sample.sampleType}`;
+            } else {
+                details.textContent = 'Photo';
+            }
+
+            info.appendChild(label);
+            info.appendChild(details);
+
+            const cost = document.createElement('div');
+            cost.className = 'sample-cost';
+            cost.textContent = `$${sample.cost}`;
+
+            item.appendChild(info);
+            item.appendChild(cost);
+
+            item.onclick = () => {
+                selection = [{ type: 'sample', index: index }];
+                renderScene();
+                populateSampleProps();
+                updateSampleList();
+            };
+
+            listContainer.appendChild(item);
+        });
+    }
+
+    function updateSampleCost() {
+        if (selection.length === 1 && selection[0].type === 'sample') {
+            const sample = samples[selection[0].index];
+            if (sample.type === 'test') {
+                const testType = sampleInputs.testType.value;
+                sample.testType = testType;
+                sample.cost = TEST_COSTS[testType];
+                updateBudgetDisplay();
+                updateSampleList();
+            }
+        }
+    }
+
+    function populateSampleProps() {
+        if (selection.length === 0 || selection[0].type !== 'sample') {
+            samplePropsForm.classList.add('hidden');
+            sampleNoSelectMsg.classList.remove('hidden');
+            return;
+        }
+
+        samplePropsForm.classList.remove('hidden');
+        sampleNoSelectMsg.classList.add('hidden');
+
+        const sample = samples[selection[0].index];
+        sampleInputs.label.value = sample.label;
+        sampleInputs.notes.value = sample.notes || '';
+
+        if (sample.type === 'test') {
+            sampleInputs.testFields.classList.remove('hidden');
+            sampleInputs.testType.value = sample.testType;
+            sampleInputs.sampleType.value = sample.sampleType;
+        } else {
+            sampleInputs.testFields.classList.add('hidden');
+        }
+    }
+
+    function applySamplePropChange() {
+        if (selection.length === 1 && selection[0].type === 'sample') {
+            const sample = samples[selection[0].index];
+            sample.notes = sampleInputs.notes.value;
+            if (sample.type === 'test') {
+                sample.sampleType = sampleInputs.sampleType.value;
+            }
+        }
+    }
 
     // --- TRANSFORM & COORDS ---
     function updateTransform() {
@@ -329,6 +728,18 @@
         inputList.forEach(el => {
             el.oninput = applyPropChange;
         });
+
+        // Sample mode inputs
+        const sampleInputList = [sampleInputs.sampleType, sampleInputs.notes];
+        sampleInputList.forEach(el => {
+            el.oninput = applySamplePropChange;
+        });
+
+        // Mouse move for tooltip
+        svg.addEventListener('mousemove', updateTooltip);
+        svg.addEventListener('mouseleave', () => {
+            tooltip.style.display = 'none';
+        });
     }
 
     function onMouseDown(evt) {
@@ -343,48 +754,98 @@
         const target = evt.target;
         const isShift = evt.shiftKey;
 
-        // Mode: Draw Polygon
-        if (mode === 'draw_poly') {
-            handlePolyDrawClick(pos);
-            return;
-        }
+        // EDIT MODE
+        if (appMode === 'edit') {
+            // Mode: Draw Polygon
+            if (mode === 'draw_poly') {
+                handlePolyDrawClick(pos);
+                return;
+            }
 
-        // Mode: Add Player
-        if (mode === 'add_player') {
-            addPlayer(pos.snappedX, pos.snappedY);
-            return;
-        }
+            // Mode: Add Player
+            if (mode === 'add_player') {
+                addPlayer(pos.snappedX, pos.snappedY);
+                return;
+            }
 
-        // Mode: Select
-        if (mode === 'select') {
-            const hitType = target.getAttribute('data-type');
-            const hitIndex = parseInt(target.getAttribute('data-index'));
+            // Mode: Select
+            if (mode === 'select') {
+                const hitType = target.getAttribute('data-type');
+                const hitIndex = parseInt(target.getAttribute('data-index'));
 
-            if (hitType) {
-                // Clicked object
-                const alreadySelected = selection.find(s => s.type === hitType && s.index === hitIndex);
-                if (isShift) {
-                    if (alreadySelected) {
-                        selection = selection.filter(s => !(s.type === hitType && s.index === hitIndex));
+                if (hitType) {
+                    // Clicked object
+                    const alreadySelected = selection.find(s => s.type === hitType && s.index === hitIndex);
+                    if (isShift) {
+                        if (alreadySelected) {
+                            selection = selection.filter(s => !(s.type === hitType && s.index === hitIndex));
+                        } else {
+                            selection.push({ type: hitType, index: hitIndex });
+                        }
                     } else {
-                        selection.push({ type: hitType, index: hitIndex });
+                        if (!alreadySelected) {
+                            selection = [{ type: hitType, index: hitIndex }];
+                        }
                     }
-                } else {
-                    if (!alreadySelected) {
-                        selection = [{ type: hitType, index: hitIndex }];
-                    }
-                }
-                startDrag(pos);
-                renderScene(); // To update selection visuals
-                populateProps();
-            } else {
-                // Clicked Empty Space
-                if (!isShift) {
-                    selection = [];
+                    startDrag(pos);
+                    renderScene();
                     populateProps();
+                } else {
+                    // Clicked Empty Space
+                    if (!isShift) {
+                        selection = [];
+                        populateProps();
+                    }
+                    startBoxSelect(pos);
+                    renderScene();
                 }
-                startBoxSelect(pos);
-                renderScene();
+            }
+        }
+
+        // SAMPLE MODE
+        if (appMode === 'sample') {
+            // Mode: Add Test
+            if (mode === 'add_test') {
+                addSample(pos.snappedX, pos.snappedY, 'test');
+                return;
+            }
+
+            // Mode: Add Photo
+            if (mode === 'add_photo') {
+                addSample(pos.snappedX, pos.snappedY, 'photo');
+                return;
+            }
+
+            // Mode: Select
+            if (mode === 'select') {
+                const hitType = target.getAttribute('data-type');
+                const hitIndex = parseInt(target.getAttribute('data-index'));
+
+                if (hitType === 'sample') {
+                    const alreadySelected = selection.find(s => s.type === 'sample' && s.index === hitIndex);
+                    if (isShift) {
+                        if (alreadySelected) {
+                            selection = selection.filter(s => !(s.type === 'sample' && s.index === hitIndex));
+                        } else {
+                            selection.push({ type: 'sample', index: hitIndex });
+                        }
+                    } else {
+                        if (!alreadySelected) {
+                            selection = [{ type: 'sample', index: hitIndex }];
+                        }
+                    }
+                    startDrag(pos);
+                    renderScene();
+                    populateSampleProps();
+                    updateSampleList();
+                } else {
+                    if (!isShift) {
+                        selection = [];
+                        populateSampleProps();
+                        updateSampleList();
+                    }
+                    renderScene();
+                }
             }
         }
     }
@@ -503,6 +964,9 @@
             if (item.type === 'player') {
                 const p = players[item.index];
                 return { type: 'player', index: item.index, x: p.x, y: p.y };
+            } else if (item.type === 'sample') {
+                const s = samples[item.index];
+                return { type: 'sample', index: item.index, x: s.x, y: s.y };
             } else {
                 const s = sections[item.index];
                 const pts = s.polygon_points.split(' ').map(pair => {
@@ -525,6 +989,10 @@
                 const p = players[snapItem.index];
                 p.x = snapItem.x + dx;
                 p.y = snapItem.y + dy;
+            } else if (snapItem.type === 'sample') {
+                const s = samples[snapItem.index];
+                s.x = snapItem.x + dx;
+                s.y = snapItem.y + dy;
             } else {
                 const s = sections[snapItem.index];
                 s.polygon_points = snapItem.points.map(pt => `${pt.x + dx},${pt.y + dy}`).join(' ');
@@ -534,6 +1002,34 @@
             }
         });
         renderScene();
+    }
+
+    // --- TOOLTIP ---
+    function updateTooltip(evt) {
+        const target = evt.target;
+        const hitType = target.getAttribute('data-type');
+        const hitIndex = parseInt(target.getAttribute('data-index'));
+
+        if (hitType === 'sample' && appMode === 'sample') {
+            const sample = samples[hitIndex];
+            let text = `${sample.label}`;
+            if (sample.type === 'test') {
+                text += ` - ${sample.testType.toUpperCase()} (${sample.sampleType})`;
+                text += ` - $${sample.cost}`;
+            } else {
+                text += ` - Photo (FREE)`;
+            }
+            if (sample.notes) {
+                text += `\n${sample.notes.substring(0, 50)}...`;
+            }
+
+            tooltip.textContent = text;
+            tooltip.style.display = 'block';
+            tooltip.style.left = (evt.clientX + 15) + 'px';
+            tooltip.style.top = (evt.clientY + 15) + 'px';
+        } else {
+            tooltip.style.display = 'none';
+        }
     }
 
     // --- BOX SELECT ---
@@ -601,7 +1097,9 @@
     function renderScene() {
         layerPolys.innerHTML = '';
         layerPlayers.innerHTML = '';
+        layerSamples.innerHTML = '';
 
+        // Render sections
         sections.forEach((sect, index) => {
             const isSelected = selection.some(s => s.type === 'section' && s.index === index);
             const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
@@ -613,7 +1111,7 @@
             poly.setAttribute("data-type", "section");
             poly.setAttribute("data-index", index);
             layerPolys.appendChild(poly);
-            
+
             if (sect.label_pos) {
                 const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 txt.setAttribute("x", sect.label_pos.x);
@@ -627,18 +1125,74 @@
             }
         });
 
-        players.forEach((p, index) => {
-            const isSelected = selection.some(s => s.type === 'player' && s.index === index);
-            const parentSect = sections.find(s => s.id === p.section_id);
-            const color = p.custom_color ? p.custom_color : (parentSect ? parentSect.color : '#888');
-            const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            c.setAttribute("cx", p.x); c.setAttribute("cy", p.y); c.setAttribute("r", 6);
-            c.setAttribute("class", "player-node" + (isSelected ? " player-selected" : ""));
-            c.setAttribute("fill", color);
-            c.setAttribute("data-type", "player");
-            c.setAttribute("data-index", index);
-            layerPlayers.appendChild(c);
-        });
+        // Render players (only in edit mode)
+        if (appMode === 'edit' || appMode === 'viewer') {
+            players.forEach((p, index) => {
+                const isSelected = selection.some(s => s.type === 'player' && s.index === index);
+                const parentSect = sections.find(s => s.id === p.section_id);
+                const color = p.custom_color ? p.custom_color : (parentSect ? parentSect.color : '#888');
+                const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                c.setAttribute("cx", p.x); c.setAttribute("cy", p.y); c.setAttribute("r", 6);
+                c.setAttribute("class", "player-node" + (isSelected ? " player-selected" : ""));
+                c.setAttribute("fill", color);
+                c.setAttribute("data-type", "player");
+                c.setAttribute("data-index", index);
+                layerPlayers.appendChild(c);
+            });
+        }
+
+        // Render samples (in sample and viewer modes)
+        if (appMode === 'sample' || appMode === 'viewer') {
+            samples.forEach((sample, index) => {
+                const isSelected = selection.some(s => s.type === 'sample' && s.index === index);
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+                if (sample.type === 'test') {
+                    // Triangle for test sites
+                    const size = 10;
+                    const points = [
+                        [sample.x, sample.y - size],
+                        [sample.x - size * 0.866, sample.y + size * 0.5],
+                        [sample.x + size * 0.866, sample.y + size * 0.5]
+                    ].map(p => p.join(',')).join(' ');
+
+                    const triangle = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                    triangle.setAttribute("points", points);
+                    triangle.setAttribute("fill", "#fbbf24");
+                    triangle.setAttribute("class", "sample-node" + (isSelected ? " sample-selected" : ""));
+                    triangle.setAttribute("data-type", "sample");
+                    triangle.setAttribute("data-index", index);
+                    g.appendChild(triangle);
+                } else {
+                    // Square for photos
+                    const size = 8;
+                    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                    rect.setAttribute("x", sample.x - size);
+                    rect.setAttribute("y", sample.y - size);
+                    rect.setAttribute("width", size * 2);
+                    rect.setAttribute("height", size * 2);
+                    rect.setAttribute("fill", "#a78bfa");
+                    rect.setAttribute("class", "sample-node" + (isSelected ? " sample-selected" : ""));
+                    rect.setAttribute("data-type", "sample");
+                    rect.setAttribute("data-index", index);
+                    g.appendChild(rect);
+                }
+
+                // Label
+                const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                txt.setAttribute("x", sample.x);
+                txt.setAttribute("y", sample.y + 20);
+                txt.setAttribute("fill", "white");
+                txt.setAttribute("font-size", "10");
+                txt.setAttribute("font-weight", "bold");
+                txt.setAttribute("text-anchor", "middle");
+                txt.setAttribute("pointer-events", "none");
+                txt.textContent = sample.label;
+                g.appendChild(txt);
+
+                layerSamples.appendChild(g);
+            });
+        }
     }
 
     // --- PROPERTIES & AUTO UPDATE ---
@@ -706,11 +1260,38 @@
         // Sort descending to delete cleanly
         const pIdx = selection.filter(s => s.type === 'player').map(s => s.index).sort((a,b)=>b-a);
         const sIdx = selection.filter(s => s.type === 'section').map(s => s.index).sort((a,b)=>b-a);
+        const sampIdx = selection.filter(s => s.type === 'sample').map(s => s.index).sort((a,b)=>b-a);
+
         pIdx.forEach(i => players.splice(i,1));
         sIdx.forEach(i => sections.splice(i,1));
+        sampIdx.forEach(i => samples.splice(i,1));
+
         selection = [];
         renderScene();
-        populateProps();
+
+        if (appMode === 'edit') {
+            populateProps();
+        } else if (appMode === 'sample') {
+            populateSampleProps();
+            updateBudgetDisplay();
+            updateSampleList();
+            // Renumber samples
+            renumberSamples();
+        }
+    }
+
+    function renumberSamples() {
+        let testNum = 1;
+        let photoNum = 1;
+        samples.forEach(s => {
+            if (s.type === 'test') {
+                s.label = `S${testNum++}`;
+            } else {
+                s.label = `P${photoNum++}`;
+            }
+        });
+        updateSampleList();
+        renderScene();
     }
 
     // --- HELPERS ---
@@ -723,9 +1304,14 @@
     // --- EXPORT/IMPORT ---
     function exportData() {
         const out = {
-            config: { hover_metrics: ["total_count", "percent_deceased", "percent_symptomatic"] },
+            config: {
+                hover_metrics: ["total_count", "percent_deceased", "percent_symptomatic"],
+                budget_max: BUDGET_MAX
+            },
             sections: sections,
-            players: players
+            players: players,
+            samples: samples,
+            budget_used: calculateTotalCost()
         };
         document.getElementById('json-output').value = JSON.stringify(out, null, 2);
         document.getElementById('output-modal').style.display = 'flex';
@@ -733,7 +1319,7 @@
     function copyToClipboard() {
         document.getElementById("json-output").select();
         document.execCommand("copy");
-        alert("Copied!");
+        alert("Copied to clipboard!");
     }
     function openImportModal() {
         document.getElementById('json-input').value = '';
@@ -742,13 +1328,19 @@
     function importData() {
         try {
             const d = JSON.parse(document.getElementById('json-input').value);
-            if(!d.sections || !d.players) throw new Error("Invalid Format");
-            sections = d.sections;
-            players = d.players;
+            sections = d.sections || [];
+            players = d.players || [];
+            samples = d.samples || [];
             selection = [];
+
+            if (appMode === 'sample') {
+                updateBudgetDisplay();
+                updateSampleList();
+            }
+
             renderScene();
             document.getElementById('import-modal').style.display = 'none';
-        } catch(e) { alert("Error: " + e.message); }
+        } catch(e) { alert("Import Error: " + e.message); }
     }
 
 </script>
