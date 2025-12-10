@@ -39,7 +39,9 @@ class DynamicIndexHandler(http.server.SimpleHTTPRequestHandler):
         ]
 
         for name, has_index in apps:
-            href = f"/apps/{urllib.parse.quote(name)}/"
+            # Use relative links so this index works whether server root is repo root
+            # or when served from a directory that maps to the repo root.
+            href = f"apps/{urllib.parse.quote(name)}/"
             note = "" if has_index else " (no index.html — directory served)"
             parts.append(f"<div class=\"card\"><a href=\"{href}\"><strong>{name}</strong></a><div style=\"color:#9fb0c4\">{note}</div></div>")
 
