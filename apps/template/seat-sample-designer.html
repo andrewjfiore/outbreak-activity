@@ -2,276 +2,1103 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Orchestra Layout Designer</title>
+    <title>Orchestra Layout Designer Pro</title>
     <style>
         :root {
-            --bg-color: #1a1a1a;
-            --panel-bg: #2a2a2a;
-            --text-color: #e0e0e0;
-            --accent: #00d2ff;
-            --border: #444;
-            --grid-line: #333;
-            --select-box: rgba(0, 210, 255, 0.2);
+            --bg-color: #0f0f12;
+            --panel-bg: #18181c;
+            --panel-bg-elevated: #1e1e24;
+            --text-color: #e8e8ec;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --accent-secondary: #22d3ee;
+            --border: #2a2a32;
+            --border-subtle: #222228;
+            --grid-line: #1e1e24;
+            --select-box: rgba(99, 102, 241, 0.15);
+            --tooltip-bg: rgba(15, 15, 18, 0.98);
+            --tooltip-border: rgba(99, 102, 241, 0.3);
+            --danger: #ef4444;
+            --danger-soft: rgba(239, 68, 68, 0.15);
+            --success: #22c55e;
+            --success-soft: rgba(34, 197, 94, 0.15);
+            --warning: #f59e0b;
+            --warning-soft: rgba(245, 158, 11, 0.15);
+            --info: #3b82f6;
+            --info-soft: rgba(59, 130, 246, 0.15);
+            --text-muted: #9ca3af;
+            --text-subtle: #6b7280;
+            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 20px var(--accent-glow);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --transition-fast: 0.15s ease;
+            --transition-med: 0.25s ease;
         }
-        body { margin: 0; background: var(--bg-color); color: var(--text-color); font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; overflow: hidden; user-select: none; }
-        
-        /* Sidebar Tools */
-        .sidebar { 
-            width: 320px; /* Widened for more data fields */
-            background: var(--panel-bg); 
-            border-right: 1px solid var(--border); 
-            display: flex; flex-direction: column; 
-            padding: 15px; box-sizing: border-box; 
-            z-index: 20; 
-            overflow-y: auto;
-        }
-        .sidebar h3 { margin-top: 0; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 10px; font-size: 1.1em; }
-        
-        button {
-            background: #333; color: white; border: 1px solid #555; padding: 10px; margin-bottom: 8px; cursor: pointer; text-align: left; transition: all 0.2s; border-radius: 4px;
-        }
-        button:hover { background: #444; }
-        button.active { background: var(--accent); color: #000; font-weight: bold; border-color: var(--accent); }
-        
-        .control-group { margin-bottom: 20px; display: flex; flex-direction: column; }
-        label { font-size: 0.8em; color: #888; margin-bottom: 4px; font-weight: 600; }
-        input, select, textarea { 
-            background: #111; border: 1px solid #444; color: white; padding: 8px; margin-bottom: 10px; 
-            border-radius: 4px; font-family: inherit; font-size: 0.9em;
-        }
-        input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; }
-        textarea { resize: vertical; min-height: 60px; }
-        
-        .hint { font-size: 0.75em; color: #666; margin-top: -8px; margin-bottom: 10px; font-style: italic; }
-        .row { display: flex; gap: 10px; }
-        .row > div { flex: 1; }
 
-        /* Main Canvas Area */
-        #canvas-area { flex: 1; position: relative; overflow: hidden; background: #151515; cursor: default; }
-        
-        svg { width: 100%; height: 100%; outline: none; display: block; }
-        
+        body.theme-light {
+            --bg-color: #f8fafc;
+            --panel-bg: #ffffff;
+            --panel-bg-elevated: #f1f5f9;
+            --text-color: #1e293b;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.25);
+            --accent-secondary: #0891b2;
+            --border: #e2e8f0;
+            --border-subtle: #f1f5f9;
+            --grid-line: #e2e8f0;
+            --select-box: rgba(99, 102, 241, 0.1);
+            --tooltip-bg: rgba(255, 255, 255, 0.98);
+            --tooltip-border: rgba(99, 102, 241, 0.25);
+            --danger: #dc2626;
+            --danger-soft: rgba(220, 38, 38, 0.1);
+            --success: #16a34a;
+            --success-soft: rgba(22, 163, 74, 0.1);
+            --warning: #d97706;
+            --warning-soft: rgba(217, 119, 6, 0.1);
+            --info: #2563eb;
+            --info-soft: rgba(37, 99, 235, 0.1);
+            --text-muted: #64748b;
+            --text-subtle: #94a3b8;
+            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+            transition: background var(--transition-med), color var(--transition-med);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 340px;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            z-index: 20;
+            overflow-y: auto;
+            transition: all var(--transition-med);
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .sidebar h3 {
+            margin: 0 0 16px 0;
+            color: var(--text-color);
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sidebar h3::before {
+            content: '';
+            width: 3px;
+            height: 14px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        /* Mode Switcher */
+        .mode-switch {
+            display: flex;
+            background: var(--bg-color);
+            border-radius: var(--radius-md);
+            padding: 4px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+        }
+        .mode-btn {
+            flex: 1;
+            padding: 10px 16px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.8em;
+            letter-spacing: 0.02em;
+            transition: all var(--transition-fast);
+            color: var(--text-muted);
+        }
+        .mode-btn.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: var(--shadow-glow);
+        }
+        .mode-btn:not(.active):hover {
+            background: var(--panel-bg-elevated);
+            color: var(--text-color);
+        }
+
+        /* Theme & Settings Row */
+        .settings-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .setting-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .setting-item label {
+            font-size: 0.7em;
+            color: var(--text-subtle);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .setting-item select,
+        .setting-item input {
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            color: var(--text-color);
+            padding: 8px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85em;
+            transition: all var(--transition-fast);
+        }
+        .setting-item select:focus,
+        .setting-item input:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        /* Tool Buttons */
+        .tool-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .tool-btn {
+            background: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border);
+            padding: 12px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            border-radius: var(--radius-sm);
+            font-size: 0.85em;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tool-btn .icon {
+            font-size: 1.1em;
+        }
+        .tool-btn:hover {
+            background: var(--panel-bg-elevated);
+            border-color: var(--accent);
+        }
+        .tool-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            box-shadow: var(--shadow-glow);
+        }
+        .tool-btn.danger {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+        .tool-btn.danger:hover {
+            background: var(--danger-soft);
+        }
+        .tool-btn.full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* Shortcut Hints */
+        .shortcuts {
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            margin-bottom: 20px;
+        }
+        .shortcut-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            font-size: 0.8em;
+        }
+        .shortcut-key {
+            background: var(--panel-bg-elevated);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.85em;
+            color: var(--accent);
+            border: 1px solid var(--border);
+        }
+        .shortcut-desc {
+            color: var(--text-muted);
+        }
+
+        /* Properties Panel */
+        .props-section {
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .props-section h4 {
+            margin: 0 0 12px 0;
+            font-size: 0.8em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .prop-group {
+            margin-bottom: 14px;
+        }
+        .prop-group:last-child {
+            margin-bottom: 0;
+        }
+        .prop-group label {
+            display: block;
+            font-size: 0.75em;
+            color: var(--text-subtle);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .prop-group input,
+        .prop-group select,
+        .prop-group textarea {
+            width: 100%;
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            color: var(--text-color);
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9em;
+            font-family: inherit;
+            transition: all var(--transition-fast);
+        }
+        .prop-group input:focus,
+        .prop-group select:focus,
+        .prop-group textarea:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        .prop-group textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .prop-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* Symptoms Manager */
+        .symptoms-manager {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px;
+            margin-top: 8px;
+        }
+        .symptom-list {
+            max-height: 120px;
+            overflow-y: auto;
+            margin-bottom: 8px;
+        }
+        .symptom-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--warning-soft);
+            color: var(--warning);
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.75em;
+            font-weight: 500;
+            margin: 3px;
+            border: 1px solid transparent;
+        }
+        .symptom-tag .remove-btn {
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity var(--transition-fast);
+        }
+        .symptom-tag .remove-btn:hover {
+            opacity: 1;
+        }
+        .symptom-tag.severity-mild {
+            background: var(--info-soft);
+            color: var(--info);
+        }
+        .symptom-tag.severity-moderate {
+            background: var(--warning-soft);
+            color: var(--warning);
+        }
+        .symptom-tag.severity-severe {
+            background: var(--danger-soft);
+            color: var(--danger);
+        }
+        .add-symptom-row {
+            display: flex;
+            gap: 6px;
+        }
+        .add-symptom-row input {
+            flex: 1;
+            padding: 6px 10px;
+            font-size: 0.8em;
+        }
+        .add-symptom-row select {
+            width: 90px;
+            padding: 6px 8px;
+            font-size: 0.8em;
+        }
+        .add-symptom-row button {
+            padding: 6px 12px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        /* No Selection State */
+        .no-selection {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--text-muted);
+        }
+        .no-selection .icon {
+            font-size: 2.5em;
+            margin-bottom: 12px;
+            opacity: 0.3;
+        }
+        .no-selection p {
+            margin: 0;
+            font-size: 0.9em;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            font-weight: 600;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-primary:hover {
+            box-shadow: var(--shadow-glow);
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background: var(--panel-bg-elevated);
+            color: var(--text-color);
+            font-weight: 500;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-secondary:hover {
+            background: var(--bg-color);
+            border-color: var(--accent);
+        }
+
+        /* Canvas Area */
+        #canvas-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: var(--bg-color);
+            cursor: default;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+            outline: none;
+            display: block;
+        }
+
+        /* Grid Pattern */
+        .grid-path {
+            fill: none;
+            stroke: var(--grid-line);
+            stroke-width: 1;
+        }
+
         /* Zoom Controls */
         #zoom-controls {
-            position: absolute; bottom: 20px; right: 20px; display: flex; gap: 5px; z-index: 100;
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 100;
         }
-        .zoom-btn { width: 30px; height: 30px; text-align: center; padding: 0; font-weight: bold; font-size: 1.2em; border-radius: 50%; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
+        .zoom-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.1em;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-soft);
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--panel-bg);
+            color: var(--text-color);
+            transition: all var(--transition-fast);
+        }
+        .zoom-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
 
-        /* Grid */
-        .grid-line { stroke: var(--grid-line); stroke-width: 1; }
-        
+        /* Stats Bar */
+        #stats-bar {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+        }
+        .stat-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            min-width: 100px;
+            box-shadow: var(--shadow-soft);
+        }
+        .stat-card .stat-value {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+        .stat-card .stat-label {
+            font-size: 0.7em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .stat-card.danger .stat-value { color: var(--danger); }
+        .stat-card.warning .stat-value { color: var(--warning); }
+        .stat-card.success .stat-value { color: var(--success); }
+
         /* SVG Elements */
-        .poly-draft { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 5,5; vector-effect: non-scaling-stroke; }
-        .poly-finished { stroke-width: 2; transition: opacity 0.2s; cursor: pointer; vector-effect: non-scaling-stroke; }
-        .poly-finished:hover { opacity: 0.8; }
-        .poly-selected { stroke: #fff !important; stroke-dasharray: 8,4; stroke-width: 3; }
-        
-        .player-node { stroke: #fff; stroke-width: 1; transition: r 0.1s; cursor: pointer; vector-effect: non-scaling-stroke; }
-        .player-node:hover { stroke-width: 2; }
-        .player-selected { stroke: var(--accent); stroke-width: 3; fill: #fff !important; }
+        .poly-draft {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 2;
+            stroke-dasharray: 8, 4;
+            vector-effect: non-scaling-stroke;
+            filter: drop-shadow(0 0 6px var(--accent-glow));
+        }
+        .poly-finished {
+            stroke-width: 2;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+            vector-effect: non-scaling-stroke;
+        }
+        .poly-finished:hover {
+            filter: brightness(1.2);
+        }
+        .poly-selected {
+            stroke: white !important;
+            stroke-dasharray: 6, 3;
+            stroke-width: 2.5;
+            filter: drop-shadow(0 0 8px rgba(255,255,255,0.3));
+        }
 
-        .selection-rect { fill: var(--select-box); stroke: var(--accent); stroke-width: 1; pointer-events: none; vector-effect: non-scaling-stroke; }
+        .player-node {
+            stroke: rgba(255,255,255,0.8);
+            stroke-width: 2;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+            vector-effect: non-scaling-stroke;
+        }
+        .player-node:hover {
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px currentColor);
+        }
+        .player-selected {
+            stroke: white !important;
+            stroke-width: 3 !important;
+            filter: drop-shadow(0 0 12px var(--accent)) !important;
+        }
+        .player-dead {
+            stroke: var(--danger) !important;
+            stroke-dasharray: 3, 2;
+        }
+        .player-symptomatic {
+            animation: pulse-symptom 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse-symptom {
+            0%, 100% { stroke-width: 2; }
+            50% { stroke-width: 4; }
+        }
+        .player-dimmed {
+            opacity: 0.15;
+        }
+        .mark-x {
+            stroke: var(--danger);
+            stroke-width: 3;
+            pointer-events: none;
+            vector-effect: non-scaling-stroke;
+        }
 
-        /* Hidden/Visible Helpers */
+        .selection-rect {
+            fill: var(--select-box);
+            stroke: var(--accent);
+            stroke-width: 1;
+            stroke-dasharray: 4, 2;
+            pointer-events: none;
+            vector-effect: non-scaling-stroke;
+        }
+
+        /* Tooltip - Enhanced */
+        #tooltip {
+            position: absolute;
+            background: var(--tooltip-bg);
+            border: 1px solid var(--tooltip-border);
+            color: var(--text-color);
+            padding: 0;
+            border-radius: var(--radius-md);
+            font-size: 0.85em;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: var(--shadow-soft), 0 0 40px rgba(0,0,0,0.3);
+            max-width: 300px;
+            display: none;
+            backdrop-filter: blur(12px);
+            overflow: hidden;
+        }
+        .tooltip-header {
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .tooltip-header .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 0.9em;
+        }
+        .tooltip-header .name {
+            font-weight: 600;
+            color: white;
+            font-size: 1em;
+        }
+        .tooltip-header .subtitle {
+            font-size: 0.8em;
+            color: rgba(255,255,255,0.7);
+        }
+        .tooltip-body {
+            padding: 14px 16px;
+        }
+        .tooltip-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .tooltip-stat:last-child {
+            border-bottom: none;
+        }
+        .tooltip-stat .label {
+            color: var(--text-subtle);
+            font-size: 0.85em;
+        }
+        .tooltip-stat .value {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        .tooltip-symptoms {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+        .tooltip-symptoms-title {
+            font-size: 0.75em;
+            color: var(--text-subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+        .tooltip-symptom-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .tooltip-history {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+        .tooltip-history-title {
+            font-size: 0.75em;
+            color: var(--text-subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+        .tooltip-history-text {
+            font-size: 0.85em;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+        .status-badge.alive {
+            background: var(--success-soft);
+            color: var(--success);
+        }
+        .status-badge.deceased {
+            background: var(--danger-soft);
+            color: var(--danger);
+        }
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* Section Tooltip */
+        .section-tooltip-header {
+            background: linear-gradient(135deg, var(--tooltip-header-color, #6366f1), var(--tooltip-header-color-2, #22d3ee));
+        }
+        .section-stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .section-stat-item {
+            background: var(--bg-color);
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            text-align: center;
+        }
+        .section-stat-item .val {
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+        .section-stat-item .lbl {
+            font-size: 0.7em;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .section-stat-item.danger .val { color: var(--danger); }
+        .section-stat-item.warning .val { color: var(--warning); }
+
         .hidden { display: none !important; }
-
-        /* JSON Modals */
-        #output-modal, #import-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 200;
-        }
-        .modal-content {
-            background: var(--panel-bg); padding: 20px; width: 600px; height: 500px; display: flex; flex-direction: column; border-radius: 8px; border: 1px solid var(--accent);
-        }
-        .modal-textarea { flex: 1; background: #111; color: #0f0; font-family: monospace; border: 1px solid #444; padding: 10px; resize: none; }
-        .modal-actions { margin-top: 10px; display: flex; justify-content: flex-end; gap: 10px; }
-
+        #file-input { display: none; }
     </style>
 </head>
-<body>
+<body class="theme-dark">
 
-    <!-- LEFT SIDEBAR: Tools -->
-    <div class="sidebar">
-        <h3>Toolbox</h3>
-        <div class="control-group">
-            <button id="btn-select" class="active" onclick="setMode('select')">👆 Select / Move / Drag</button>
-            <button id="btn-poly" onclick="setMode('draw_poly')">⬠ Draw Section</button>
-            <button id="btn-player" onclick="setMode('add_player')">● Add Player</button>
-            <button id="btn-delete" onclick="deleteSelected()" style="background: #522; border-color: #844;">🗑 Delete Selected</button>
+<div class="sidebar">
+    <div class="mode-switch">
+        <div id="mode-edit" class="mode-btn active" onclick="setAppMode('edit')">EDIT MODE</div>
+        <div id="mode-view" class="mode-btn" onclick="setAppMode('view')">VIEWER</div>
+    </div>
+
+    <div class="settings-row">
+        <div class="setting-item">
+            <label>Theme</label>
+            <select id="theme-select" onchange="setTheme(this.value)">
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+            </select>
         </div>
-
-        <div class="control-group">
-            <label>Grid Snapping (px)</label>
+        <div class="setting-item">
+            <label>Grid Size</label>
             <input type="number" id="grid-size" value="20" min="5" max="100" onchange="updateGrid()">
-            <div class="hint">Hold Space + Drag to Pan</div>
+        </div>
+    </div>
+
+    <div id="panel-tools">
+        <h3>Tools</h3>
+        <div class="tool-grid">
+            <button id="btn-select" class="tool-btn active" onclick="setTool('select')">
+                <span class="icon">👆</span> Select
+            </button>
+            <button id="btn-poly" class="tool-btn" onclick="setTool('draw_poly')">
+                <span class="icon">⬠</span> Section
+            </button>
+            <button id="btn-player" class="tool-btn" onclick="setTool('add_player')">
+                <span class="icon">●</span> Player
+            </button>
+            <button id="btn-delete" class="tool-btn danger" onclick="deleteSelected()">
+                <span class="icon">🗑</span> Delete
+            </button>
         </div>
 
-        <h3>Properties</h3>
-        <div id="props-panel">
-            <p id="no-selection-msg" style="color: #666; font-style: italic;">Select an item to edit...</p>
-            
-            <div id="props-form" class="hidden">
-                <div class="control-group">
-                    <label>Section Assignment / ID</label>
-                    <input type="text" id="prop-id" placeholder="ID or Section ID">
-                    
+        <div class="shortcuts">
+            <div class="shortcut-row">
+                <span class="shortcut-desc">Toggle Death</span>
+                <span class="shortcut-key">Shift + Click</span>
+            </div>
+            <div class="shortcut-row">
+                <span class="shortcut-desc">Pan Canvas</span>
+                <span class="shortcut-key">Middle Mouse</span>
+            </div>
+            <div class="shortcut-row">
+                <span class="shortcut-desc">Zoom</span>
+                <span class="shortcut-key">Scroll Wheel</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="panel-viewer" class="hidden">
+        <h3>Viewer Mode</h3>
+        <div class="shortcuts">
+            <div class="shortcut-row">
+                <span class="shortcut-desc">Dim Player</span>
+                <span class="shortcut-key">Left Click</span>
+            </div>
+            <div class="shortcut-row">
+                <span class="shortcut-desc">Mark X</span>
+                <span class="shortcut-key">Right Click</span>
+            </div>
+            <div class="shortcut-row">
+                <span class="shortcut-desc">View Stats</span>
+                <span class="shortcut-key">Hover</span>
+            </div>
+        </div>
+    </div>
+
+    <h3>Properties</h3>
+    <div id="props-panel">
+        <div id="no-selection" class="no-selection">
+            <div class="icon">◎</div>
+            <p>Select an element to edit its properties</p>
+        </div>
+
+        <div id="props-form" class="hidden">
+            <div class="props-section">
+                <h4>Basic Info</h4>
+                <div class="prop-group">
+                    <label>ID / Section Assignment</label>
+                    <input type="text" id="prop-id" placeholder="Identifier">
+                </div>
+                <div class="prop-group">
                     <label>Display Name</label>
                     <input type="text" id="prop-name" placeholder="Name">
-
-                    <!-- Player Specific Fields -->
-                    <div id="player-fields" class="hidden">
-                        <div class="row">
-                            <div>
-                                <label>Age</label>
-                                <input type="number" id="prop-age" min="0">
-                            </div>
-                            <div>
-                                <label>Status</label>
-                                <select id="prop-status">
-                                    <option value="true">Alive</option>
-                                    <option value="false">Deceased</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <label>Symptomatic</label>
-                        <select id="prop-symptomatic">
-                            <option value="false">No</option>
-                            <option value="true">Yes</option>
-                        </select>
-
-                        <label>Medical History</label>
-                        <textarea id="prop-history" placeholder="Enter history..."></textarea>
-                    </div>
-
+                </div>
+                <div class="prop-group">
                     <label>Color</label>
-                    <input type="color" id="prop-color" value="#4facfe">
-                    <div class="hint">Section Color OR Player Override</div>
+                    <input type="color" id="prop-color" value="#6366f1">
+                </div>
+            </div>
+
+            <div id="player-fields" class="hidden">
+                <div class="props-section">
+                    <h4>Player Details</h4>
+                    <div class="prop-row">
+                        <div class="prop-group">
+                            <label>Age</label>
+                            <input type="number" id="prop-age" min="0" placeholder="Age">
+                        </div>
+                        <div class="prop-group">
+                            <label>Status</label>
+                            <select id="prop-status">
+                                <option value="true">Alive</option>
+                                <option value="false">Deceased</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="prop-group">
+                        <label>Instrument</label>
+                        <select id="prop-instrument">
+                            <option value="">Select...</option>
+                            <optgroup label="Strings">
+                                <option value="violin">Violin</option>
+                                <option value="viola">Viola</option>
+                                <option value="cello">Cello</option>
+                                <option value="double_bass">Double Bass</option>
+                                <option value="harp">Harp</option>
+                            </optgroup>
+                            <optgroup label="Woodwinds">
+                                <option value="flute">Flute</option>
+                                <option value="oboe">Oboe</option>
+                                <option value="clarinet">Clarinet</option>
+                                <option value="bassoon">Bassoon</option>
+                            </optgroup>
+                            <optgroup label="Brass">
+                                <option value="trumpet">Trumpet</option>
+                                <option value="french_horn">French Horn</option>
+                                <option value="trombone">Trombone</option>
+                                <option value="tuba">Tuba</option>
+                            </optgroup>
+                            <optgroup label="Percussion">
+                                <option value="timpani">Timpani</option>
+                                <option value="percussion">Percussion</option>
+                            </optgroup>
+                            <option value="piano">Piano</option>
+                            <option value="conductor">Conductor</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="props-section">
+                    <h4>Symptoms</h4>
+                    <div class="symptoms-manager">
+                        <div class="symptom-list" id="symptom-list">
+                            <!-- Symptoms will be rendered here -->
+                        </div>
+                        <div class="add-symptom-row">
+                            <input type="text" id="new-symptom-name" placeholder="Symptom name...">
+                            <select id="new-symptom-severity">
+                                <option value="mild">Mild</option>
+                                <option value="moderate">Mod</option>
+                                <option value="severe">Severe</option>
+                            </select>
+                            <button onclick="addSymptom()">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="props-section">
+                    <h4>Medical History</h4>
+                    <div class="prop-group">
+                        <textarea id="prop-history" placeholder="Enter medical history, notes, etc."></textarea>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div style="margin-top: auto;">
-            <button onclick="openImportModal()" style="background: #444; color: #fff; font-weight: bold; width: 100%; margin-bottom: 10px;">IMPORT JSON</button>
-            <button onclick="exportData()" style="background: var(--accent); color: #000; font-weight: bold; width: 100%;">EXPORT JSON</button>
+    <div class="action-buttons">
+        <input type="file" id="file-input" accept=".json" onchange="handleFileLoad(this)">
+        <button onclick="document.getElementById('file-input').click()" class="btn-secondary">
+            📂 Load File
+        </button>
+        <button onclick="saveToFile()" class="btn-primary">
+            💾 Save Project
+        </button>
+    </div>
+</div>
+
+<div id="canvas-area">
+    <svg id="stage">
+        <defs>
+            <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                <path class="grid-path" d="M 20 0 L 0 0 0 20"/>
+            </pattern>
+            <filter id="glow">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+            </filter>
+        </defs>
+        <g id="viewport">
+            <rect id="bg-rect" x="-10000" y="-10000" width="20000" height="20000" fill="url(#grid)" />
+            <g id="layer-polys"></g>
+            <g id="layer-draft"></g>
+            <g id="layer-players"></g>
+            <g id="layer-ui"></g>
+        </g>
+    </svg>
+
+    <div id="stats-bar">
+        <div class="stat-card">
+            <div class="stat-value" id="stat-total">0</div>
+            <div class="stat-label">Total Players</div>
+        </div>
+        <div class="stat-card warning">
+            <div class="stat-value" id="stat-symptomatic">0</div>
+            <div class="stat-label">Symptomatic</div>
+        </div>
+        <div class="stat-card danger">
+            <div class="stat-value" id="stat-deceased">0</div>
+            <div class="stat-label">Deceased</div>
+        </div>
+        <div class="stat-card success">
+            <div class="stat-value" id="stat-sections">0</div>
+            <div class="stat-label">Sections</div>
         </div>
     </div>
 
-    <!-- MAIN CANVAS -->
-    <div id="canvas-area">
-        <svg id="stage">
-            <defs>
-                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#222" stroke-width="1"/>
-                </pattern>
-            </defs>
-            <!-- Viewport Group for Zoom/Pan -->
-            <g id="viewport">
-                <rect id="bg-rect" x="-5000" y="-5000" width="10000" height="10000" fill="url(#grid)" />
-                <g id="layer-polys"></g>
-                <g id="layer-draft"></g>
-                <g id="layer-players"></g>
-                <g id="layer-ui"></g> <!-- Selection Box -->
-            </g>
-        </svg>
-
-        <div id="zoom-controls">
-            <button class="zoom-btn" onclick="applyZoom(1.2)" title="Zoom In">+</button>
-            <button class="zoom-btn" onclick="applyZoom(0.8)" title="Zoom Out">-</button>
-            <button class="zoom-btn" onclick="resetZoom()" title="Reset View" style="font-size: 0.8em">R</button>
-        </div>
+    <div id="zoom-controls">
+        <button class="zoom-btn" onclick="applyZoom(1.2)" title="Zoom In">+</button>
+        <button class="zoom-btn" onclick="applyZoom(0.8)" title="Zoom Out">−</button>
+        <button class="zoom-btn" onclick="resetZoom()" title="Reset View">⟲</button>
     </div>
 
-    <!-- JSON OUTPUT MODAL -->
-    <div id="output-modal">
-        <div class="modal-content">
-            <h3 style="margin-top:0">Export Data</h3>
-            <p style="font-size:0.9em; color:#888;">Copy this into <code>orchestra_data.json</code></p>
-            <textarea id="json-output" class="modal-textarea"></textarea>
-            <div class="modal-actions">
-                <button onclick="document.getElementById('output-modal').style.display='none'">Close</button>
-                <button onclick="copyToClipboard()" style="background:var(--accent); color:black;">Copy</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- JSON IMPORT MODAL -->
-    <div id="import-modal">
-        <div class="modal-content">
-            <h3 style="margin-top:0">Import Data</h3>
-            <p style="font-size:0.9em; color:#888;">Paste <code>orchestra_data.json</code> content here to load it.</p>
-            <textarea id="json-input" class="modal-textarea"></textarea>
-            <div class="modal-actions">
-                <button onclick="document.getElementById('import-modal').style.display='none'">Cancel</button>
-                <button onclick="importData()" style="background:var(--accent); color:black;">Load Data</button>
-            </div>
-        </div>
-    </div>
+    <div id="tooltip"></div>
+</div>
 
 <script>
-    // --- STATE ---
-    let mode = 'select'; 
+    // === STATE ===
+    let appMode = 'edit';
+    let tool = 'select';
     let gridSize = 20;
-    
+
     let sections = [];
     let players = [];
-    
-    // Selection
     let selection = [];
-    
-    // Draft
+
     let draftPoints = [];
 
-    // Dragging
     let isDragging = false;
     let dragStart = { x: 0, y: 0 };
     let snapshot = [];
 
-    // Box Select
     let isBoxSelecting = false;
     let boxStart = { x: 0, y: 0 };
 
-    // Pan & Zoom
-    let viewX = 0;
-    let viewY = 0;
-    let viewScale = 1;
+    let viewX = 0, viewY = 0, viewScale = 1;
     let isPanning = false;
     let panStart = { x: 0, y: 0 };
 
-    // DOM Elements
+    // DOM
     const svg = document.getElementById('stage');
     const viewport = document.getElementById('viewport');
     const layerPolys = document.getElementById('layer-polys');
     const layerPlayers = document.getElementById('layer-players');
     const layerDraft = document.getElementById('layer-draft');
     const layerUI = document.getElementById('layer-ui');
-    
-    // Inputs
+    const tooltip = document.getElementById('tooltip');
+
+    const panelTools = document.getElementById('panel-tools');
+    const panelViewer = document.getElementById('panel-viewer');
     const propsForm = document.getElementById('props-form');
-    const noSelectMsg = document.getElementById('no-selection-msg');
+    const noSelection = document.getElementById('no-selection');
+
     const inputs = {
         id: document.getElementById('prop-id'),
         name: document.getElementById('prop-name'),
         color: document.getElementById('prop-color'),
         age: document.getElementById('prop-age'),
         status: document.getElementById('prop-status'),
-        symptomatic: document.getElementById('prop-symptomatic'),
+        instrument: document.getElementById('prop-instrument'),
         history: document.getElementById('prop-history'),
-        playerFields: document.getElementById('player-fields')
+        playerFields: document.getElementById('player-fields'),
+        symptomList: document.getElementById('symptom-list'),
+        newSymptomName: document.getElementById('new-symptom-name'),
+        newSymptomSeverity: document.getElementById('new-symptom-severity')
     };
 
-    // --- INITIALIZATION ---
+    // === INIT ===
     updateGrid();
     setupEventHandlers();
     setupAutoUpdate();
+    updateStats();
 
-    // --- TRANSFORM & COORDS ---
+    // === THEME ===
+    function setTheme(mode) {
+        document.body.classList.remove('theme-dark', 'theme-light');
+        document.body.classList.add('theme-' + mode);
+    }
+
+    // === APP MODE ===
+    function setAppMode(mode) {
+        appMode = mode;
+        document.getElementById('mode-edit').classList.toggle('active', mode === 'edit');
+        document.getElementById('mode-view').classList.toggle('active', mode === 'view');
+
+        if (mode === 'view') {
+            panelTools.classList.add('hidden');
+            panelViewer.classList.remove('hidden');
+            document.getElementById('props-panel').style.opacity = '0.4';
+            document.getElementById('props-panel').style.pointerEvents = 'none';
+            selection = [];
+        } else {
+            panelTools.classList.remove('hidden');
+            panelViewer.classList.add('hidden');
+            document.getElementById('props-panel').style.opacity = '1';
+            document.getElementById('props-panel').style.pointerEvents = 'auto';
+        }
+        renderScene();
+    }
+
+    // === TRANSFORM ===
     function updateTransform() {
         viewport.setAttribute('transform', `translate(${viewX}, ${viewY}) scale(${viewScale})`);
     }
 
     function applyZoom(factor) {
-        viewScale *= factor;
+        viewScale = Math.max(0.1, Math.min(5, viewScale * factor));
         updateTransform();
     }
 
@@ -281,26 +1108,15 @@
     }
 
     function getMousePos(evt) {
-        // Convert screen coordinates to SVG Local coordinates inside the viewport group
-        // Formula: (Screen - Translate) / Scale
         const CTM = svg.getScreenCTM();
-        const screenX = evt.clientX;
-        const screenY = evt.clientY;
-
-        // Raw SVG coord (ignoring viewBox if we had one, but we use group transform)
-        // Adjust for SVG position on screen
-        const relX = screenX - CTM.e;
-        const relY = screenY - CTM.f;
-
-        // Apply Viewport Transform inverse
+        const relX = evt.clientX - CTM.e;
+        const relY = evt.clientY - CTM.f;
         const localX = (relX - viewX) / viewScale;
         const localY = (relY - viewY) / viewScale;
-
-        return { 
-            x: localX, 
-            y: localY, 
-            snappedX: snap(localX), 
-            snappedY: snap(localY) 
+        return {
+            x: localX, y: localY,
+            snappedX: snap(localX), snappedY: snap(localY),
+            clientX: evt.clientX, clientY: evt.clientY
         };
     }
 
@@ -308,32 +1124,44 @@
         return Math.round(val / gridSize) * gridSize;
     }
 
-    // --- EVENT HANDLERS ---
+    // === EVENTS ===
     function setupEventHandlers() {
         svg.addEventListener('mousedown', onMouseDown);
         window.addEventListener('mousemove', onMouseMove);
         window.addEventListener('mouseup', onMouseUp);
-        
-        // Wheel Zoom
-        svg.addEventListener('wheel', (e) => {
+        svg.addEventListener('contextmenu', e => e.preventDefault());
+        svg.addEventListener('wheel', e => {
             e.preventDefault();
-            const factor = e.deltaY > 0 ? 0.9 : 1.1;
-            viewScale *= factor;
-            updateTransform();
+            applyZoom(e.deltaY > 0 ? 0.9 : 1.1);
+        });
+        
+        // Keyboard shortcuts
+        window.addEventListener('keydown', e => {
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                    deleteSelected();
+                }
+            }
+            if (e.key === 'Escape') {
+                if (tool === 'draw_poly' && draftPoints.length > 0) {
+                    draftPoints = [];
+                    renderDraft();
+                }
+                selection = [];
+                renderScene();
+                populateProps();
+            }
         });
     }
 
     function setupAutoUpdate() {
-        // Attach oninput listener to all inputs for auto-update
-        const inputList = [inputs.id, inputs.name, inputs.color, inputs.age, inputs.status, inputs.symptomatic, inputs.history];
-        inputList.forEach(el => {
+        [inputs.id, inputs.name, inputs.color, inputs.age, inputs.status, inputs.instrument, inputs.history].forEach(el => {
             el.oninput = applyPropChange;
         });
     }
 
     function onMouseDown(evt) {
-        // Check for Pan (Spacebar or Middle Click)
-        if (evt.button === 1 || (evt.button === 0 && evt.code === 'Space')) {
+        if (evt.button === 1) {
             isPanning = true;
             panStart = { x: evt.clientX, y: evt.clientY };
             return;
@@ -342,90 +1170,110 @@
         const pos = getMousePos(evt);
         const target = evt.target;
         const isShift = evt.shiftKey;
+        const hitType = target.getAttribute('data-type');
+        const hitIndex = parseInt(target.getAttribute('data-index'));
 
-        // Mode: Draw Polygon
-        if (mode === 'draw_poly') {
-            handlePolyDrawClick(pos);
+        // Viewer Mode
+        if (appMode === 'view') {
+            if (hitType === 'player') {
+                const p = players[hitIndex];
+                if (evt.button === 0) p.view_dimmed = !p.view_dimmed;
+                else if (evt.button === 2) p.view_marked = !p.view_marked;
+                renderScene();
+            }
             return;
         }
 
-        // Mode: Add Player
-        if (mode === 'add_player') {
-            addPlayer(pos.snappedX, pos.snappedY);
+        // Edit Mode
+        if (tool === 'draw_poly') {
+            if (evt.button === 0) handlePolyDrawClick(pos);
             return;
         }
 
-        // Mode: Select
-        if (mode === 'select') {
-            const hitType = target.getAttribute('data-type');
-            const hitIndex = parseInt(target.getAttribute('data-index'));
+        if (tool === 'add_player') {
+            if (evt.button === 0) addPlayer(pos.snappedX, pos.snappedY);
+            return;
+        }
 
+        if (tool === 'select') {
             if (hitType) {
-                // Clicked object
-                const alreadySelected = selection.find(s => s.type === hitType && s.index === hitIndex);
-                if (isShift) {
-                    if (alreadySelected) {
-                        selection = selection.filter(s => !(s.type === hitType && s.index === hitIndex));
-                    } else {
-                        selection.push({ type: hitType, index: hitIndex });
-                    }
-                } else {
-                    if (!alreadySelected) {
-                        selection = [{ type: hitType, index: hitIndex }];
-                    }
+                if (hitType === 'player' && isShift) {
+                    players[hitIndex].alive = !players[hitIndex].alive;
+                    renderScene();
+                    updateStats();
+                    populateProps();
+                    return;
                 }
+
+                const alreadySelected = selection.find(s => s.type === hitType && s.index === hitIndex);
+                if (isShift && hitType !== 'player') {
+                    if (alreadySelected) selection = selection.filter(s => !(s.type === hitType && s.index === hitIndex));
+                    else selection.push({ type: hitType, index: hitIndex });
+                } else {
+                    if (!alreadySelected) selection = [{ type: hitType, index: hitIndex }];
+                }
+
                 startDrag(pos);
-                renderScene(); // To update selection visuals
+                renderScene();
                 populateProps();
             } else {
-                // Clicked Empty Space
                 if (!isShift) {
                     selection = [];
                     populateProps();
                 }
-                startBoxSelect(pos);
-                renderScene();
+                if (evt.button === 0) {
+                    startBoxSelect(pos);
+                    renderScene();
+                }
             }
         }
     }
 
     function onMouseMove(evt) {
+        // Tooltip positioning
+        if (tooltip.style.display === 'block') {
+            const x = Math.min(evt.clientX + 15, window.innerWidth - tooltip.offsetWidth - 20);
+            const y = Math.min(evt.clientY + 15, window.innerHeight - tooltip.offsetHeight - 20);
+            tooltip.style.left = x + 'px';
+            tooltip.style.top = y + 'px';
+        }
+
         if (isPanning) {
-            const dx = evt.clientX - panStart.x;
-            const dy = evt.clientY - panStart.y;
-            viewX += dx;
-            viewY += dy;
+            viewX += evt.clientX - panStart.x;
+            viewY += evt.clientY - panStart.y;
             panStart = { x: evt.clientX, y: evt.clientY };
             updateTransform();
             return;
         }
 
         const pos = getMousePos(evt);
-
-        if (mode === 'draw_poly') renderDraft(pos);
-        else if (isDragging) handleDrag(pos);
-        else if (isBoxSelecting) handleBoxSelect(pos);
+        if (appMode === 'edit') {
+            if (tool === 'draw_poly') renderDraft(pos);
+            else if (isDragging) handleDrag(pos);
+            else if (isBoxSelecting) handleBoxSelect(pos);
+        }
     }
 
-    function onMouseUp(evt) {
+    function onMouseUp() {
         isPanning = false;
         isDragging = false;
         if (isBoxSelecting) finishBoxSelect();
     }
 
-    // --- TOOLBAR FUNCTIONS ---
-    function setMode(newMode) {
-        mode = newMode;
-        document.querySelectorAll('.sidebar button').forEach(b => b.classList.remove('active'));
-        if(newMode === 'select') document.getElementById('btn-select').classList.add('active');
-        if(newMode === 'draw_poly') document.getElementById('btn-poly').classList.add('active');
-        if(newMode === 'add_player') document.getElementById('btn-player').classList.add('active');
+    // === TOOLS ===
+    function setTool(newTool) {
+        tool = newTool;
+        document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+        const btn = document.getElementById('btn-' + (newTool === 'draw_poly' ? 'poly' : newTool));
+        if (btn) btn.classList.add('active');
 
         draftPoints = [];
         renderDraft();
-        selection = [];
-        renderScene();
-        populateProps();
+        if (newTool !== 'select') {
+            selection = [];
+            renderScene();
+            populateProps();
+        }
     }
 
     function updateGrid() {
@@ -433,45 +1281,52 @@
         const pattern = document.getElementById('grid');
         pattern.setAttribute('width', gridSize);
         pattern.setAttribute('height', gridSize);
-        pattern.innerHTML = `<path d="M ${gridSize} 0 L 0 0 0 ${gridSize}" fill="none" stroke="#2a2a2a" stroke-width="1"/>`;
+        pattern.innerHTML = `<path class="grid-path" d="M ${gridSize} 0 L 0 0 0 ${gridSize}"/>`;
     }
 
-    // --- LOGIC ---
+    // === PLAYER & SECTION LOGIC ===
     function addPlayer(x, y) {
-        let assignedSection = sections.length > 0 ? sections[sections.length - 1].id : "section_1";
+        const assignedSection = sections.length > 0 ? sections[sections.length - 1].id : 'section_1';
         players.push({
-            id: players.length + 1,
+            id: `player_${Date.now()}`,
             section_id: assignedSection,
-            x: x, y: y,
+            x, y,
             name: `Player ${players.length + 1}`,
-            age: 30, alive: true, symptomatic: false, history: "None"
+            age: 30,
+            alive: true,
+            instrument: '',
+            symptoms: [], // Array of { name: string, severity: 'mild'|'moderate'|'severe', onset_date?: string }
+            history: '',
+            view_dimmed: false,
+            view_marked: false,
+            custom_color: null
         });
         renderScene();
+        updateStats();
     }
 
     function finishPoly() {
         if (draftPoints.length < 3) return;
         const pointsStr = draftPoints.map(p => `${p.x},${p.y}`).join(' ');
-        const id = `section_${sections.length + 1}`;
+        const id = `section_${Date.now()}`;
         sections.push({
-            id: id,
-            name: "New Section",
-            color: inputs.color.value,
+            id,
+            name: 'New Section',
+            color: inputs.color.value || '#6366f1',
             polygon_points: pointsStr,
             label_pos: getCentroid(draftPoints)
         });
         draftPoints = [];
         renderDraft();
         renderScene();
-        setMode('select');
+        updateStats();
+        setTool('select');
     }
 
     function handlePolyDrawClick(pos) {
         if (draftPoints.length > 2) {
             const start = draftPoints[0];
-            const dx = Math.abs(pos.snappedX - start.x);
-            const dy = Math.abs(pos.snappedY - start.y);
-            if (dx < gridSize/2 && dy < gridSize/2) {
+            if (Math.abs(pos.snappedX - start.x) < gridSize/2 && Math.abs(pos.snappedY - start.y) < gridSize/2) {
                 finishPoly();
                 return;
             }
@@ -483,19 +1338,32 @@
     function renderDraft(mousePos = null) {
         layerDraft.innerHTML = '';
         if (draftPoints.length === 0) return;
+
         let d = `M ${draftPoints[0].x} ${draftPoints[0].y}`;
         for (let i = 1; i < draftPoints.length; i++) {
             d += ` L ${draftPoints[i].x} ${draftPoints[i].y}`;
         }
         if (mousePos) d += ` L ${mousePos.snappedX} ${mousePos.snappedY}`;
-        
-        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        path.setAttribute("d", d);
-        path.setAttribute("class", "poly-draft");
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', d);
+        path.setAttribute('class', 'poly-draft');
         layerDraft.appendChild(path);
+
+        // Draw vertices
+        draftPoints.forEach((pt, i) => {
+            const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            c.setAttribute('cx', pt.x);
+            c.setAttribute('cy', pt.y);
+            c.setAttribute('r', 4);
+            c.setAttribute('fill', i === 0 ? '#22c55e' : 'var(--accent)');
+            c.setAttribute('stroke', 'white');
+            c.setAttribute('stroke-width', '2');
+            layerDraft.appendChild(c);
+        });
     }
 
-    // --- DRAG ---
+    // === DRAG & BOX SELECT ===
     function startDrag(pos) {
         isDragging = true;
         dragStart = { x: pos.snappedX, y: pos.snappedY };
@@ -509,8 +1377,7 @@
                     const [px, py] = pair.split(',').map(Number);
                     return { x: px, y: py };
                 });
-                const lbl = s.label_pos ? { ...s.label_pos } : null;
-                return { type: 'section', index: item.index, points: pts, label_pos: lbl };
+                return { type: 'section', index: item.index, points: pts, label_pos: s.label_pos ? { ...s.label_pos } : null };
             }
         });
     }
@@ -520,23 +1387,20 @@
         const dx = pos.snappedX - dragStart.x;
         const dy = pos.snappedY - dragStart.y;
 
-        snapshot.forEach(snapItem => {
-            if (snapItem.type === 'player') {
-                const p = players[snapItem.index];
-                p.x = snapItem.x + dx;
-                p.y = snapItem.y + dy;
+        snapshot.forEach(snap => {
+            if (snap.type === 'player') {
+                players[snap.index].x = snap.x + dx;
+                players[snap.index].y = snap.y + dy;
             } else {
-                const s = sections[snapItem.index];
-                s.polygon_points = snapItem.points.map(pt => `${pt.x + dx},${pt.y + dy}`).join(' ');
-                if (snapItem.label_pos) {
-                    s.label_pos = { x: snapItem.label_pos.x + dx, y: snapItem.label_pos.y + dy };
+                sections[snap.index].polygon_points = snap.points.map(pt => `${pt.x + dx},${pt.y + dy}`).join(' ');
+                if (snap.label_pos) {
+                    sections[snap.index].label_pos = { x: snap.label_pos.x + dx, y: snap.label_pos.y + dy };
                 }
             }
         });
         renderScene();
     }
 
-    // --- BOX SELECT ---
     function startBoxSelect(pos) {
         isBoxSelecting = true;
         boxStart = { x: pos.x, y: pos.y };
@@ -547,22 +1411,20 @@
         if (!isBoxSelecting) return;
         const x = Math.min(boxStart.x, pos.x);
         const y = Math.min(boxStart.y, pos.y);
-        const w = Math.abs(pos.x - boxStart.x);
-        const h = Math.abs(pos.y - boxStart.y);
-        drawSelectionBox(x, y, w, h);
+        drawSelectionBox(x, y, Math.abs(pos.x - boxStart.x), Math.abs(pos.y - boxStart.y));
     }
 
     function finishBoxSelect() {
         isBoxSelecting = false;
         const rect = document.getElementById('selection-rect');
         if (!rect) return;
+
         const rx = parseFloat(rect.getAttribute('x'));
         const ry = parseFloat(rect.getAttribute('y'));
         const rw = parseFloat(rect.getAttribute('width'));
         const rh = parseFloat(rect.getAttribute('height'));
-        layerUI.innerHTML = ''; 
+        layerUI.innerHTML = '';
 
-        // Check intersections
         players.forEach((p, idx) => {
             if (p.x >= rx && p.x <= rx + rw && p.y >= ry && p.y <= ry + rh) {
                 if (!selection.find(s => s.type === 'player' && s.index === idx)) {
@@ -571,109 +1433,266 @@
             }
         });
 
-        // Simple bounding box check for polys for simplicity
         sections.forEach((s, idx) => {
             const points = s.polygon_points.split(' ').map(pair => {
                 const [px, py] = pair.split(',').map(Number);
                 return { x: px, y: py };
             });
-            const isInside = points.some(p => p.x >= rx && p.x <= rx + rw && p.y >= ry && p.y <= ry + rh);
-            if (isInside) {
-                if (!selection.find(s => s.type === 'section' && s.index === idx)) {
+            if (points.some(p => p.x >= rx && p.x <= rx + rw && p.y >= ry && p.y <= ry + rh)) {
+                if (!selection.find(sel => sel.type === 'section' && sel.index === idx)) {
                     selection.push({ type: 'section', index: idx });
                 }
             }
         });
+
         renderScene();
         populateProps();
     }
 
     function drawSelectionBox(x, y, w, h) {
         layerUI.innerHTML = '';
-        const r = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-        r.setAttribute("id", "selection-rect");
-        r.setAttribute("x", x); r.setAttribute("y", y); r.setAttribute("width", w); r.setAttribute("height", h);
-        r.setAttribute("class", "selection-rect");
+        const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        r.setAttribute('id', 'selection-rect');
+        r.setAttribute('x', x);
+        r.setAttribute('y', y);
+        r.setAttribute('width', w);
+        r.setAttribute('height', h);
+        r.setAttribute('class', 'selection-rect');
         layerUI.appendChild(r);
     }
 
-    // --- RENDER SCENE ---
+    // === RENDER ===
     function renderScene() {
         layerPolys.innerHTML = '';
         layerPlayers.innerHTML = '';
 
+        // Sections
         sections.forEach((sect, index) => {
             const isSelected = selection.some(s => s.type === 'section' && s.index === index);
-            const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-            poly.setAttribute("points", sect.polygon_points);
-            poly.setAttribute("fill", sect.color);
-            poly.setAttribute("fill-opacity", "0.2");
-            poly.setAttribute("stroke", sect.color);
-            poly.setAttribute("class", "poly-finished" + (isSelected ? " poly-selected" : ""));
-            poly.setAttribute("data-type", "section");
-            poly.setAttribute("data-index", index);
+            const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            poly.setAttribute('points', sect.polygon_points);
+            poly.setAttribute('fill', sect.color);
+            poly.setAttribute('fill-opacity', '0.15');
+            poly.setAttribute('stroke', sect.color);
+            poly.setAttribute('class', 'poly-finished' + (isSelected ? ' poly-selected' : ''));
+            poly.setAttribute('data-type', 'section');
+            poly.setAttribute('data-index', index);
+            poly.onmouseenter = () => showSectionTooltip(index, sect.color);
+            poly.onmouseleave = hideTooltip;
             layerPolys.appendChild(poly);
-            
+
             if (sect.label_pos) {
-                const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                txt.setAttribute("x", sect.label_pos.x);
-                txt.setAttribute("y", sect.label_pos.y);
-                txt.setAttribute("fill", "white");
-                txt.setAttribute("font-size", "10");
-                txt.setAttribute("text-anchor", "middle");
-                txt.setAttribute("pointer-events", "none");
+                const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                txt.setAttribute('x', sect.label_pos.x);
+                txt.setAttribute('y', sect.label_pos.y);
+                txt.setAttribute('fill', 'white');
+                txt.setAttribute('font-size', '11');
+                txt.setAttribute('font-weight', '600');
+                txt.setAttribute('text-anchor', 'middle');
+                txt.setAttribute('pointer-events', 'none');
                 txt.textContent = sect.name;
                 layerPolys.appendChild(txt);
             }
         });
 
+        // Players
         players.forEach((p, index) => {
             const isSelected = selection.some(s => s.type === 'player' && s.index === index);
             const parentSect = sections.find(s => s.id === p.section_id);
-            const color = p.custom_color ? p.custom_color : (parentSect ? parentSect.color : '#888');
-            const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            c.setAttribute("cx", p.x); c.setAttribute("cy", p.y); c.setAttribute("r", 6);
-            c.setAttribute("class", "player-node" + (isSelected ? " player-selected" : ""));
-            c.setAttribute("fill", color);
-            c.setAttribute("data-type", "player");
-            c.setAttribute("data-index", index);
-            layerPlayers.appendChild(c);
+            const color = p.custom_color || (parentSect ? parentSect.color : '#888');
+
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+            // Glow effect for symptomatic
+            if (p.symptoms && p.symptoms.length > 0 && p.alive) {
+                const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                glow.setAttribute('cx', p.x);
+                glow.setAttribute('cy', p.y);
+                glow.setAttribute('r', 12);
+                glow.setAttribute('fill', 'none');
+                glow.setAttribute('stroke', '#f59e0b');
+                glow.setAttribute('stroke-width', '2');
+                glow.setAttribute('opacity', '0.5');
+                glow.style.animation = 'pulse-symptom 1.5s ease-in-out infinite';
+                g.appendChild(glow);
+            }
+
+            const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            c.setAttribute('cx', p.x);
+            c.setAttribute('cy', p.y);
+            c.setAttribute('r', 7);
+            c.setAttribute('fill', color);
+
+            let classes = 'player-node';
+            if (isSelected) classes += ' player-selected';
+            if (!p.alive) classes += ' player-dead';
+            if (p.symptoms && p.symptoms.length > 0 && p.alive) classes += ' player-symptomatic';
+            if (p.view_dimmed) classes += ' player-dimmed';
+
+            c.setAttribute('class', classes);
+            c.setAttribute('data-type', 'player');
+            c.setAttribute('data-index', index);
+            c.onmouseenter = () => showPlayerTooltip(index, color);
+            c.onmouseleave = hideTooltip;
+            g.appendChild(c);
+
+            if (p.view_marked) {
+                const s = 8;
+                const xPath = `M ${p.x-s} ${p.y-s} L ${p.x+s} ${p.y+s} M ${p.x+s} ${p.y-s} L ${p.x-s} ${p.y+s}`;
+                const xEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                xEl.setAttribute('d', xPath);
+                xEl.setAttribute('class', 'mark-x');
+                g.appendChild(xEl);
+            }
+
+            layerPlayers.appendChild(g);
         });
     }
 
-    // --- PROPERTIES & AUTO UPDATE ---
+    // === TOOLTIP ===
+    function showPlayerTooltip(index, color) {
+        const p = players[index];
+        const initials = p.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        const sect = sections.find(s => s.id === p.section_id);
+
+        let symptomsHtml = '';
+        if (p.symptoms && p.symptoms.length > 0) {
+            symptomsHtml = `
+                <div class="tooltip-symptoms">
+                    <div class="tooltip-symptoms-title">Active Symptoms</div>
+                    <div class="tooltip-symptom-tags">
+                        ${p.symptoms.map(s => `<span class="symptom-tag severity-${s.severity}">${s.name}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        let historyHtml = '';
+        if (p.history && p.history.trim()) {
+            historyHtml = `
+                <div class="tooltip-history">
+                    <div class="tooltip-history-title">Medical History</div>
+                    <div class="tooltip-history-text">${p.history}</div>
+                </div>
+            `;
+        }
+
+        tooltip.innerHTML = `
+            <div class="tooltip-header" style="background: linear-gradient(135deg, ${color}, ${adjustColor(color, 30)})">
+                <div class="avatar">${initials}</div>
+                <div>
+                    <div class="name">${p.name}</div>
+                    <div class="subtitle">${p.instrument ? formatInstrument(p.instrument) : 'Unassigned'} · ${sect ? sect.name : 'No Section'}</div>
+                </div>
+            </div>
+            <div class="tooltip-body">
+                <div class="tooltip-stat">
+                    <span class="label">Age</span>
+                    <span class="value">${p.age || '—'}</span>
+                </div>
+                <div class="tooltip-stat">
+                    <span class="label">Status</span>
+                    <span class="value"><span class="status-badge ${p.alive ? 'alive' : 'deceased'}">${p.alive ? 'Alive' : 'Deceased'}</span></span>
+                </div>
+                <div class="tooltip-stat">
+                    <span class="label">Symptoms</span>
+                    <span class="value">${p.symptoms ? p.symptoms.length : 0}</span>
+                </div>
+                ${symptomsHtml}
+                ${historyHtml}
+            </div>
+        `;
+        tooltip.style.display = 'block';
+    }
+
+    function showSectionTooltip(index, color) {
+        const s = sections[index];
+        const assigned = players.filter(p => p.section_id === s.id);
+        const total = assigned.length;
+        const dead = assigned.filter(p => !p.alive).length;
+        const symp = assigned.filter(p => p.symptoms && p.symptoms.length > 0).length;
+
+        const pctDead = total > 0 ? ((dead / total) * 100).toFixed(1) : '0.0';
+        const pctSymp = total > 0 ? ((symp / total) * 100).toFixed(1) : '0.0';
+
+        tooltip.innerHTML = `
+            <div class="tooltip-header section-tooltip-header" style="background: linear-gradient(135deg, ${color}, ${adjustColor(color, 30)})">
+                <div class="avatar">⬠</div>
+                <div>
+                    <div class="name">${s.name}</div>
+                    <div class="subtitle">Section · ${total} members</div>
+                </div>
+            </div>
+            <div class="tooltip-body">
+                <div class="section-stat-grid">
+                    <div class="section-stat-item">
+                        <div class="val">${total}</div>
+                        <div class="lbl">Total</div>
+                    </div>
+                    <div class="section-stat-item warning">
+                        <div class="val">${pctSymp}%</div>
+                        <div class="lbl">Symptomatic</div>
+                    </div>
+                    <div class="section-stat-item danger">
+                        <div class="val">${dead}</div>
+                        <div class="lbl">Deceased</div>
+                    </div>
+                    <div class="section-stat-item danger">
+                        <div class="val">${pctDead}%</div>
+                        <div class="lbl">Mortality</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        tooltip.style.display = 'block';
+    }
+
+    function hideTooltip() {
+        tooltip.style.display = 'none';
+    }
+
+    function adjustColor(hex, amount) {
+        const num = parseInt(hex.replace('#', ''), 16);
+        const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+        const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amount));
+        const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount));
+        return '#' + (0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1);
+    }
+
+    function formatInstrument(inst) {
+        return inst.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    }
+
+    // === PROPERTIES ===
     function populateProps() {
         if (selection.length === 0) {
             propsForm.classList.add('hidden');
-            noSelectMsg.classList.remove('hidden');
+            noSelection.classList.remove('hidden');
             return;
         }
 
         propsForm.classList.remove('hidden');
-        noSelectMsg.classList.add('hidden');
+        noSelection.classList.add('hidden');
 
         const first = selection[0];
         const isPlayer = first.type === 'player';
 
         if (isPlayer) {
             const p = players[first.index];
-            inputs.id.value = p.section_id;
-            inputs.name.value = p.name;
-            inputs.color.value = p.custom_color || "#ffffff";
-            
-            // New Fields
-            inputs.age.value = p.age || 0;
+            inputs.id.value = p.section_id || '';
+            inputs.name.value = p.name || '';
+            inputs.color.value = p.custom_color || '#6366f1';
+            inputs.age.value = p.age || '';
             inputs.status.value = p.alive.toString();
-            inputs.symptomatic.value = p.symptomatic.toString();
-            inputs.history.value = p.history || "";
-
+            inputs.instrument.value = p.instrument || '';
+            inputs.history.value = p.history || '';
             inputs.playerFields.classList.remove('hidden');
+            renderSymptomList(p.symptoms || []);
         } else {
             const s = sections[first.index];
-            inputs.id.value = s.id;
-            inputs.name.value = s.name;
-            inputs.color.value = s.color;
-
+            inputs.id.value = s.id || '';
+            inputs.name.value = s.name || '';
+            inputs.color.value = s.color || '#6366f1';
             inputs.playerFields.classList.add('hidden');
         }
     }
@@ -682,75 +1701,139 @@
         selection.forEach(item => {
             if (item.type === 'player') {
                 const p = players[item.index];
-                if(inputs.id.value) p.section_id = inputs.id.value;
-                if(inputs.name.value && selection.length === 1) p.name = inputs.name.value;
+                if (inputs.id.value) p.section_id = inputs.id.value;
+                if (inputs.name.value && selection.length === 1) p.name = inputs.name.value;
                 p.custom_color = inputs.color.value;
-                
-                // New Fields
                 p.age = parseInt(inputs.age.value) || 0;
                 p.alive = inputs.status.value === 'true';
-                p.symptomatic = inputs.symptomatic.value === 'true';
+                p.instrument = inputs.instrument.value;
                 p.history = inputs.history.value;
-
             } else {
                 const s = sections[item.index];
-                if(inputs.id.value) s.id = inputs.id.value;
-                if(inputs.name.value) s.name = inputs.name.value;
-                if(inputs.color.value) s.color = inputs.color.value;
+                if (inputs.id.value) s.id = inputs.id.value;
+                if (inputs.name.value) s.name = inputs.name.value;
+                if (inputs.color.value) s.color = inputs.color.value;
             }
         });
         renderScene();
+        updateStats();
     }
 
+    // === SYMPTOMS ===
+    function renderSymptomList(symptoms) {
+        inputs.symptomList.innerHTML = symptoms.map((s, i) => `
+            <span class="symptom-tag severity-${s.severity}">
+                ${s.name}
+                <span class="remove-btn" onclick="removeSymptom(${i})">×</span>
+            </span>
+        `).join('');
+    }
+
+    function addSymptom() {
+        if (selection.length !== 1 || selection[0].type !== 'player') return;
+        const name = inputs.newSymptomName.value.trim();
+        if (!name) return;
+
+        const p = players[selection[0].index];
+        if (!p.symptoms) p.symptoms = [];
+        p.symptoms.push({
+            name,
+            severity: inputs.newSymptomSeverity.value,
+            onset_date: new Date().toISOString()
+        });
+
+        inputs.newSymptomName.value = '';
+        renderSymptomList(p.symptoms);
+        renderScene();
+        updateStats();
+    }
+
+    function removeSymptom(index) {
+        if (selection.length !== 1 || selection[0].type !== 'player') return;
+        const p = players[selection[0].index];
+        if (p.symptoms) {
+            p.symptoms.splice(index, 1);
+            renderSymptomList(p.symptoms);
+            renderScene();
+            updateStats();
+        }
+    }
+
+    // === DELETE ===
     function deleteSelected() {
-        // Sort descending to delete cleanly
-        const pIdx = selection.filter(s => s.type === 'player').map(s => s.index).sort((a,b)=>b-a);
-        const sIdx = selection.filter(s => s.type === 'section').map(s => s.index).sort((a,b)=>b-a);
-        pIdx.forEach(i => players.splice(i,1));
-        sIdx.forEach(i => sections.splice(i,1));
+        const pIdx = selection.filter(s => s.type === 'player').map(s => s.index).sort((a, b) => b - a);
+        const sIdx = selection.filter(s => s.type === 'section').map(s => s.index).sort((a, b) => b - a);
+        pIdx.forEach(i => players.splice(i, 1));
+        sIdx.forEach(i => sections.splice(i, 1));
         selection = [];
         renderScene();
         populateProps();
+        updateStats();
     }
 
-    // --- HELPERS ---
+    // === STATS ===
+    function updateStats() {
+        document.getElementById('stat-total').textContent = players.length;
+        document.getElementById('stat-symptomatic').textContent = players.filter(p => p.symptoms && p.symptoms.length > 0 && p.alive).length;
+        document.getElementById('stat-deceased').textContent = players.filter(p => !p.alive).length;
+        document.getElementById('stat-sections').textContent = sections.length;
+    }
+
+    // === UTILS ===
     function getCentroid(points) {
         let x = 0, y = 0;
         points.forEach(p => { x += p.x; y += p.y; });
-        return { x: Math.round(x/points.length), y: Math.round(y/points.length) };
+        return { x: Math.round(x / points.length), y: Math.round(y / points.length) };
     }
 
-    // --- EXPORT/IMPORT ---
-    function exportData() {
+    // === FILE I/O ===
+    function saveToFile() {
         const out = {
-            config: { hover_metrics: ["total_count", "percent_deceased", "percent_symptomatic"] },
-            sections: sections,
-            players: players
+            version: '2.0',
+            created: new Date().toISOString(),
+            sections,
+            players
         };
-        document.getElementById('json-output').value = JSON.stringify(out, null, 2);
-        document.getElementById('output-modal').style.display = 'flex';
-    }
-    function copyToClipboard() {
-        document.getElementById("json-output").select();
-        document.execCommand("copy");
-        alert("Copied!");
-    }
-    function openImportModal() {
-        document.getElementById('json-input').value = '';
-        document.getElementById('import-modal').style.display = 'flex';
-    }
-    function importData() {
-        try {
-            const d = JSON.parse(document.getElementById('json-input').value);
-            if(!d.sections || !d.players) throw new Error("Invalid Format");
-            sections = d.sections;
-            players = d.players;
-            selection = [];
-            renderScene();
-            document.getElementById('import-modal').style.display = 'none';
-        } catch(e) { alert("Error: " + e.message); }
+        const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(out, null, 2));
+        const a = document.createElement('a');
+        a.setAttribute('href', dataStr);
+        a.setAttribute('download', `orchestra_layout_${new Date().toISOString().split('T')[0]}.json`);
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
     }
 
+    function handleFileLoad(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const d = JSON.parse(e.target.result);
+                
+                // Migration: convert old format to new
+                if (d.players) {
+                    d.players = d.players.map(p => ({
+                        ...p,
+                        symptoms: p.symptoms || (p.symptomatic ? [{ name: 'Unknown', severity: 'moderate' }] : [])
+                    }));
+                }
+                
+                if (!d.sections || !d.players) throw new Error('Invalid Format');
+                sections = d.sections;
+                players = d.players;
+                selection = [];
+                renderScene();
+                updateStats();
+                populateProps();
+            } catch (err) {
+                alert('Error loading file: ' + err.message);
+            }
+            input.value = '';
+        };
+        reader.readAsText(file);
+    }
 </script>
 </body>
 </html>
