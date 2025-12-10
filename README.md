@@ -2,12 +2,11 @@
 
 Interactive outbreak investigation simulation exercise featuring interviews, sample collection, and line list creation.
 
-> **👋 New here?** Read [START-HERE.md](START-HERE.md) first!
+---
 
-## 🚀 Super Quick Start
+## 🚀 Quick Start
 
 ### 1. Edit Your HTML Apps
-Put your HTML files here:
 ```
 apps/template/dialogue-editor.html
 apps/template/dialogue-player.html
@@ -22,9 +21,7 @@ Open: **http://localhost:8000/**
 
 ### 3. Push to GitHub
 ```bash
-git add .
-git commit -m "Updated my apps"
-git push
+./update.sh
 ```
 
 **Done!** 🎉
@@ -33,20 +30,13 @@ git push
 
 ## 📚 Documentation
 
-**For Beginners:**
-- **[START-HERE.md](START-HERE.md)** - Complete beginner guide (start here!)
-- **[QUICK-START.md](QUICK-START.md)** - Essential commands
-- **[CHEATSHEET.md](CHEATSHEET.md)** - Copy-paste reference
-
-**For Advanced Users:**
-- **[HOW-TO-USE.md](HOW-TO-USE.md)** - Detailed guide with troubleshooting
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Explains the wrapper+template pattern
-- **[WORKSPACE.md](WORKSPACE.md)** - Technical workspace documentation
-- **[CLAUDE.md](CLAUDE.md)** - AI assistant documentation
+- **[GUIDE.md](GUIDE.md)** - Complete guide (start here!)
+- **[CHEATSHEET.md](CHEATSHEET.md)** - Quick command reference
+- **[CLAUDE.md](CLAUDE.md)** - Technical documentation & AI assistant guide
 
 ---
 
-## 📱 Available Apps
+## 📱 Apps
 
 | App | Purpose | URL |
 |-----|---------|-----|
@@ -60,13 +50,23 @@ git push
 
 ✅ **Edit files in**: `apps/template/`
 ✅ **Test with**: `./serve.sh`
-✅ **No build system** - pure HTML/CSS/JS
-✅ **No dependencies** - just static files
+✅ **Push with**: `./update.sh`
 
 ❌ **Don't edit**: `apps/[app-name]/index.html` (wrappers only)
 
 ---
 
-## 🆘 Need Help?
+## 🏗️ Architecture
 
-See [HOW-TO-USE.md](HOW-TO-USE.md) for troubleshooting and detailed instructions.
+**Wrapper + Template Pattern:**
+- Small wrapper files load actual apps via iframe
+- All editable files in `apps/template/`
+- Single source of truth - edit once, updates everywhere
+
+See [GUIDE.md](GUIDE.md) for details.
+
+---
+
+## 🆘 Help
+
+See [GUIDE.md](GUIDE.md) for troubleshooting, workflows, and detailed instructions.
