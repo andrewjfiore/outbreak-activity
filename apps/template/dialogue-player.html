@@ -951,7 +951,7 @@
                         <div class="speaker-name" id="speakerName"></div>
                         <div class="card-type-buttons">
                             <button class="card-type-btn question" id="btnQuestion" onclick="toggleCardType('question')" title="Mark as Question">?</button>
-                            <button class="card-type-btn decision" id="btnDecision" onclick="toggleCardType('decision')" title="Mark as Decision">!</button>
+                            <button class="card-type-btn decision" id="btnDecision" onclick="toggleCardType('decision')" title="Mark as Discussion">!</button>
                         </div>
                     </div>
                     <div class="dialogue-text" id="dialogueText"></div>
@@ -1024,7 +1024,7 @@
                     <div class="legend-item"><span class="legend-color selected"></span> Your Path</div>
                     <div class="legend-item"><span class="legend-color unselected"></span> Other Paths</div>
                     <div class="legend-item"><span class="legend-color question"></span> Question (?)</div>
-                    <div class="legend-item"><span class="legend-color decision"></span> Decision (!)</div>
+                    <div class="legend-item"><span class="legend-color decision"></span> Discussion (!)</div>
                 </div>
             </div>
             <div class="tree-container" id="treeContainer">
@@ -1115,7 +1115,30 @@
         function toggleCardType(type) {
             if (!gameState.currentNodeId) return;
             if (!gameState.nodeCardTypes[gameState.currentNodeId]) gameState.nodeCardTypes[gameState.currentNodeId] = { question: false, decision: false };
-            gameState.nodeCardTypes[gameState.currentNodeId][type] = !gameState.nodeCardTypes[gameState.currentNodeId][type];
+
+            // Get old state
+            const wasActive = gameState.nodeCardTypes[gameState.currentNodeId][type];
+
+            // Toggle
+            gameState.nodeCardTypes[gameState.currentNodeId][type] = !wasActive;
+
+            // Update counters
+            if (type === 'question') {
+                if (wasActive) {
+                    gameState.questionCount--;
+                } else {
+                    gameState.questionCount++;
+                }
+                document.getElementById('questionCount').textContent = gameState.questionCount;
+            } else if (type === 'decision') {
+                if (wasActive) {
+                    gameState.decisionTypeCount--;
+                } else {
+                    gameState.decisionTypeCount++;
+                }
+                document.getElementById('decisionTypeCount').textContent = gameState.decisionTypeCount;
+            }
+
             updateCardTypeButtons();
             renderHistoryList();
         }
@@ -1599,7 +1622,7 @@
             html += '<div class="report-summary">';
             html += `<div class="report-stat-box"><div class="report-stat-value">${gameState.decisionCount}</div><div class="report-stat-label">Decisions</div></div>`;
             html += `<div class="report-stat-box"><div class="report-stat-value">${gameState.questionCount}</div><div class="report-stat-label">Questions (?)</div></div>`;
-            html += `<div class="report-stat-box"><div class="report-stat-value">${gameState.decisionTypeCount}</div><div class="report-stat-label">Decisions (!)</div></div>`;
+            html += `<div class="report-stat-box"><div class="report-stat-value">${gameState.decisionTypeCount}</div><div class="report-stat-label">Discussions (!)</div></div>`;
             html += `<div class="report-stat-box"><div class="report-stat-value">${document.getElementById('timeElapsed').textContent}</div><div class="report-stat-label">Time</div></div>`;
             html += '</div>';
 
