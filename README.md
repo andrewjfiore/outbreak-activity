@@ -2,6 +2,8 @@
 
 Interactive outbreak investigation simulation exercise featuring interviews, sample collection, and line list creation.
 
+> **👋 New here?** Read [START-HERE.md](START-HERE.md) first!
+
 ## 🚀 Super Quick Start
 
 ### 1. Edit Your HTML Apps
@@ -31,8 +33,14 @@ git push
 
 ## 📚 Documentation
 
-- **[QUICK-START.md](QUICK-START.md)** - Essential commands (read this first!)
-- **[HOW-TO-USE.md](HOW-TO-USE.md)** - Detailed step-by-step guide
+**For Beginners:**
+- **[START-HERE.md](START-HERE.md)** - Complete beginner guide (start here!)
+- **[QUICK-START.md](QUICK-START.md)** - Essential commands
+- **[CHEATSHEET.md](CHEATSHEET.md)** - Copy-paste reference
+
+**For Advanced Users:**
+- **[HOW-TO-USE.md](HOW-TO-USE.md)** - Detailed guide with troubleshooting
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Explains the wrapper+template pattern
 - **[WORKSPACE.md](WORKSPACE.md)** - Technical workspace documentation
 - **[CLAUDE.md](CLAUDE.md)** - AI assistant documentation
 
