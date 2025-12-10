@@ -2,9 +2,9 @@
 
 ## Your 3 Main Files
 ```
-apps/template/dialogue-editor.html       ← Edit this one
-apps/template/dialogue-player.html       ← Edit this one
-apps/template/seat-sample-designer.html  ← Edit this one
+apps/dialogue-editor/index.html       ← Edit this one
+apps/dialogue-player/index.html       ← Edit this one
+apps/seat-sample-designer/index.html  ← Edit this one
 ```
 
 ## Essential Commands
@@ -13,7 +13,7 @@ apps/template/seat-sample-designer.html  ← Edit this one
 ```bash
 ./serve.sh
 ```
-Then open: http://localhost:8000/
+Then open: http://localhost:8000/apps/dialogue-editor/
 
 ### Easy Update Script (Recommended!)
 ```bash
@@ -54,9 +54,9 @@ git checkout -- .
 outbreak-activity/
 │
 ├── 📄 README.md              ← Start here
-├── 📄 QUICK-START.md         ← Quick commands
-├── 📄 HOW-TO-USE.md          ← Full guide
+├── 📄 GUIDE.md               ← Complete guide
 ├── 📄 CHEATSHEET.md          ← This file
+├── 📄 CLAUDE.md              ← Technical docs
 │
 ├── 🚀 serve.sh               ← Run to test
 ├── 🚀 update.sh              ← Run to push
@@ -64,19 +64,12 @@ outbreak-activity/
 ├── 🌐 index.html             ← Landing page
 │
 └── 📁 apps/
-    ├── 📁 dialogue-editor/
-    │   └── index.html        (wrapper - don't edit)
-    │
-    ├── 📁 dialogue-player/
-    │   └── index.html        (wrapper - don't edit)
-    │
-    ├── 📁 seat-sample-designer/
-    │   └── index.html        (wrapper - don't edit)
-    │
-    └── 📁 template/          ← EDIT FILES HERE! ⭐
-        ├── dialogue-editor.html       ✏️ EDIT THIS
-        ├── dialogue-player.html       ✏️ EDIT THIS
-        └── seat-sample-designer.html  ✏️ EDIT THIS
+    ├── dialogue-editor/
+    │   └── index.html        ✏️ EDIT THIS
+    ├── dialogue-player/
+    │   └── index.html        ✏️ EDIT THIS
+    └── seat-sample-designer/
+        └── index.html        ✏️ EDIT THIS
 ```
 
 ---
@@ -94,7 +87,7 @@ outbreak-activity/
 
 ## Typical Workflow
 
-1. **Edit** your HTML files in `apps/template/`
+1. **Edit** your HTML files in `apps/[app-name]/index.html`
 2. **Test** by running `./serve.sh`
 3. **Check** in browser at http://localhost:8000/
 4. **Push** by running `./update.sh`
@@ -134,36 +127,22 @@ git push
 
 ---
 
-## File Names Reference
+## One-Line Commands
 
-If you're renaming files, they must match exactly:
-
-| Template File | Accessed Via |
-|---------------|--------------|
-| `dialogue-editor.html` | `/apps/dialogue-editor/` |
-| `dialogue-player.html` | `/apps/dialogue-player/` |
-| `seat-sample-designer.html` | `/apps/seat-sample-designer/` |
-
----
-
-## Quick Checks
-
-### Did I edit the right file?
-✅ YES if path contains: `apps/template/`
-❌ NO if path contains: `apps/dialogue-editor/index.html` (that's just a wrapper)
-
-### Is my server running?
 ```bash
+# Start server
+./serve.sh
+
+# Git update (all-in-one)
+git add . && git commit -m "Update" && git push
+
+# Check what changed
+git status
+
+# See what's running
 ps aux | grep python
 ```
-If you see `http.server`, it's running!
-
-### What's my current git branch?
-```bash
-git branch
-```
-The one with `*` is your current branch.
 
 ---
 
-**Print this and keep it next to your computer!** 📌
+**Need more help?** See [GUIDE.md](GUIDE.md)

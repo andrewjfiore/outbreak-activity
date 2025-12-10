@@ -39,38 +39,44 @@ This repository contains a **multi-app static HTML workspace** for educational o
 
 ## Codebase Architecture
 
-### Wrapper + Template Pattern
+### Simple Directory Structure
 
-The repository uses a **two-tier architecture**:
+The repository uses a **straightforward directory-based architecture**:
 
 ```
 apps/
-├── [app-name]/
-│   └── index.html          (350-750 bytes) - Lightweight wrapper
-└── template/
-    └── [app-name].html     (30-74 KB) - Full implementation
+└── [app-name]/
+    └── index.html          (30-74 KB) - Full app implementation
 ```
 
 **How it Works**:
-- Each app folder contains a minimal wrapper `index.html`
-- The wrapper loads the actual app via iframe from `apps/template/[app-name].html`
-- This provides **single source of truth** - update one file, all instances update
+- Each app lives in its own directory under `apps/`
+- Each app has an `index.html` file containing the complete application
+- Apps are self-contained HTML files with inline styles and scripts
+- No build system, no dependencies, just static files
 
 **Benefits**:
-- DRY (Don't Repeat Yourself) - no code duplication
-- Easy maintenance - edit once in template
-- Flexible routing - each app accessible at its own path
-- Relative URLs work from different server roots
+- Simple and intuitive structure
+- Each app accessible at `/apps/[app-name]/`
+- No wrapper complexity
+- Easy to understand and maintain
 
-**Example Wrapper**:
+**Example App Structure**:
 ```html
 <!doctype html>
-<html>
-<head><title>App Name</title></head>
-<body style="margin:0;overflow:hidden">
-  <iframe src="/apps/template/app-name.html"
-          style="border:0;width:100%;height:100vh">
-  </iframe>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>App Name</title>
+  <style>
+    /* All CSS here */
+  </style>
+</head>
+<body>
+  <!-- All HTML here -->
+  <script>
+    // All JavaScript here
+  </script>
 </body>
 </html>
 ```
@@ -82,40 +88,33 @@ apps/
 ```
 outbreak-activity/
 ├── index.html              # Root landing page with app directory
-├── package.json            # npm scripts (optional, no dependencies)
 ├── serve.sh                # Shell script to start Python HTTP server
-├── serve_dynamic.py        # Python server with dynamic index generation
-├── README.md               # Basic project description
-├── WORKSPACE.md            # Multi-app workspace documentation
+├── update.sh               # Helper script to push updates
+├── README.md               # Quick overview
+├── GUIDE.md                # Complete user guide
+├── CHEATSHEET.md           # Quick command reference
 ├── CLAUDE.md               # This file - AI assistant guide
 ├── .gitignore              # Git ignore patterns
 │
 └── apps/                   # All web applications
     ├── dialogue-editor/
-    │   └── index.html      # (405 bytes) Wrapper → template
+    │   └── index.html      # (44.9 KB) Full editor app
     ├── dialogue-player/
-    │   └── index.html      # (747 bytes) Wrapper → template
-    ├── seat-sample-designer/
-    │   └── index.html      # (343 bytes) Wrapper → template
-    │
-    └── template/           # MASTER FILES - single source of truth
-        ├── index.html                      # Template info page
-        ├── dialogue-editor.html            # (44.9 KB) Full editor
-        ├── dialogue-player.html            # (73.6 KB) Full player
-        └── seat-sample-designer.html       # (30.5 KB) Full designer
+    │   └── index.html      # (73.6 KB) Full player app
+    └── seat-sample-designer/
+        └── index.html      # (30.5 KB) Full designer app
 ```
 
 ### Critical Directories
 
-- **`apps/template/`** - Primary development location for all app code
-- **`apps/[app-name]/`** - Wrappers only, rarely need modification
-- **Root** - Server configuration, landing page, documentation
+- **`apps/[app-name]/`** - Primary development location for each app
+- **Root** - Server scripts, landing page, documentation
 
 ---
 
 ## Application Details
 
-### 1. Dialogue Editor (`apps/template/dialogue-editor.html`)
+### 1. Dialogue Editor (`apps/dialogue-editor/index.html`)
 
 **Purpose**: Create interactive branching dialogue scenarios with choices, effects, and game mechanics
 
@@ -168,7 +167,7 @@ outbreak-activity/
 
 ---
 
-### 2. Dialogue Player (`apps/template/dialogue-player.html`)
+### 2. Dialogue Player (`apps/dialogue-player/index.html`)
 
 **Purpose**: Interactive player for dialogue scenarios with comprehensive analytics
 
@@ -224,7 +223,7 @@ outbreak-activity/
 
 ---
 
-### 3. Seat/Sample Designer (`apps/template/seat-sample-designer.html`)
+### 3. Seat/Sample Designer (`apps/seat-sample-designer/index.html`)
 
 **Purpose**: Visual spatial layout editor for seating arrangements or sample collection mapping
 
@@ -288,46 +287,36 @@ outbreak-activity/
 
 ### Adding a New App
 
-1. **Copy Template**:
+1. **Create App Directory**:
    ```bash
-   cp -r apps/template apps/my-new-app
-   # Edit apps/my-new-app/index.html
+   mkdir -p apps/my-new-app
    ```
 
-2. **Create Wrapper** (in `apps/my-new-app/index.html`):
-   ```html
-   <!doctype html>
-   <html>
-   <head><title>My New App</title></head>
-   <body style="margin:0;overflow:hidden">
-     <iframe src="/apps/template/my-new-app.html"
-             style="border:0;width:100%;height:100vh">
-     </iframe>
-   </body>
-   </html>
-   ```
-
-3. **Create Implementation** (in `apps/template/my-new-app.html`):
+2. **Create App File** (`apps/my-new-app/index.html`):
    - Self-contained HTML file
    - Inline CSS in `<style>` tags
    - Inline JavaScript in `<script>` tags
    - No external dependencies
 
-4. **Update Root Index** (`index.html`):
-   - Add card linking to new app
+3. **Update Root Index** (`index.html`):
+   - Add card linking to new app at `/apps/my-new-app/`
+
+4. **Test**:
+   ```bash
+   ./serve.sh
+   # Visit http://localhost:8000/apps/my-new-app/
+   ```
 
 ### Modifying Existing Apps
 
-**IMPORTANT**: Always edit files in `apps/template/`, NOT in individual app folders.
-
 **Workflow**:
 1. Identify the app to modify
-2. Edit `apps/template/[app-name].html`
-3. Test changes by accessing app via any route
-4. Changes immediately reflect in all wrappers
+2. Edit `apps/[app-name]/index.html`
+3. Test changes by running `./serve.sh`
+4. View at `http://localhost:8000/apps/[app-name]/`
 
 **Example**: To fix a bug in Dialogue Editor:
-- Edit: `apps/template/dialogue-editor.html`
+- Edit: `apps/dialogue-editor/index.html`
 - Test: `http://localhost:8000/apps/dialogue-editor/`
 
 ### Git Workflow
@@ -343,11 +332,10 @@ outbreak-activity/
 
 **Recent Commits**:
 ```
-0bf5b98 - fix(index): use relative app links so apps open when served from different roots
-b40f161 - chore(workspace): add dynamic index server; update serve.sh and package.json
-0c0f6fd - chore(workspace): add root index listing available apps
-c279edb - chore(workspace): scaffold multi-app static apps; add template, app wrappers, serve script, README update, .gitignore
-5f10b78 - Initial commit
+e67a1ba - refactor(docs): clean and consolidate repository
+6e26205 - docs(root): add START-HERE.md and ARCHITECTURE.md for beginners
+a7cc5ba - docs(root): add idiot-proof guides and helper scripts
+b77ff15 - docs(root): add comprehensive CLAUDE.md guide for AI assistants
 ```
 
 **Commit Message Style**:
@@ -413,20 +401,11 @@ c279edb - chore(workspace): scaffold multi-app static apps; add template, app wr
 
 ### Starting the Development Server
 
-**Option 1: Shell Script** (Recommended, no Node.js required)
+**Shell Script** (Python only, no Node.js required)
 ```bash
 chmod +x serve.sh
 ./serve.sh              # Default port 8000
 ./serve.sh 8080         # Custom port
-./serve.sh dynamic      # Use dynamic index (serve_dynamic.py)
-./serve.sh dynamic 8080 # Dynamic index on port 8080
-```
-
-**Option 2: npm Scripts** (If Node.js installed)
-```bash
-npm run start           # Port 8000
-npm run start:port      # Port 8080
-npm run start:dynamic   # Dynamic index
 ```
 
 ### Accessing Applications
@@ -469,22 +448,22 @@ npm run start:dynamic   # Dynamic index
 ### File Reading Strategy
 
 **When Modifying Apps**:
-1. Always read `apps/template/[app-name].html` first
+1. Always read `apps/[app-name]/index.html` first
 2. Understand the full file structure before editing
 3. Locate the specific section to modify
 4. Test changes by serving locally
 
 **File Sizes** (be aware for context limits):
-- `dialogue-editor.html`: ~45 KB, ~1,318 lines
-- `dialogue-player.html`: ~74 KB, ~1,730 lines
-- `seat-sample-designer.html`: ~30 KB, ~756 lines
+- `apps/dialogue-editor/index.html`: ~45 KB, ~1,318 lines
+- `apps/dialogue-player/index.html`: ~74 KB, ~1,730 lines
+- `apps/seat-sample-designer/index.html`: ~30 KB, ~756 lines
 
 **Tip**: Use line numbers when reading to navigate efficiently.
 
 ### Common Modification Patterns
 
 **Adding a Feature to an App**:
-1. Read the template file: `Read apps/template/[app-name].html`
+1. Read the app file: `Read apps/[app-name]/index.html`
 2. Locate relevant section (HTML structure, CSS styles, or JS functions)
 3. Use `Edit` tool with precise `old_string` matching
 4. Test changes locally
@@ -498,7 +477,7 @@ npm run start:dynamic   # Dynamic index
 5. Commit with `fix(app-name): description`
 
 **Updating Styles**:
-1. Locate CSS section in template file
+1. Locate CSS section in app file
 2. Modify CSS variables or specific rules
 3. Test visual changes in browser
 4. Ensure responsive behavior maintained
@@ -526,19 +505,17 @@ npm run start:dynamic   # Dynamic index
 ### Common Pitfall Avoidance
 
 **❌ Don't**:
-- Edit wrapper files in `apps/[app-name]/index.html` (unless changing iframe src)
 - Add external dependencies (npm packages, CDN scripts)
 - Create build processes or transpilation
-- Modify files outside of `apps/template/` for app changes
 - Use absolute paths in URLs (breaks when served from different roots)
+- Split apps into multiple files (keep self-contained)
 
 **✅ Do**:
-- Edit template files in `apps/template/`
+- Edit app files directly in `apps/[app-name]/index.html`
 - Keep code self-contained in single HTML files
 - Use inline styles and scripts
 - Test changes by serving locally
 - Use relative paths in links: `href="apps/dialogue-editor/"`
-- Maintain the wrapper + template pattern
 
 ---
 
@@ -569,12 +546,12 @@ npm run start:dynamic   # Dynamic index
 
 **Reading Files**:
 ```
-Priority: apps/template/[app-name].html (not wrapper files)
+Priority: apps/[app-name]/index.html
 ```
 
 **Editing Files**:
 ```
-Target: apps/template/[app-name].html
+Target: apps/[app-name]/index.html
 Tool: Edit with precise old_string matching
 Preserve: Indentation, line breaks, code style
 ```
@@ -582,8 +559,7 @@ Preserve: Indentation, line breaks, code style
 **Creating Files**:
 ```
 Only when: Adding entirely new app
-Location: apps/template/ for implementation
-          apps/[new-app]/ for wrapper
+Location: apps/[new-app]/index.html
 ```
 
 ### Specific Guidance by Task Type
@@ -621,9 +597,8 @@ Location: apps/template/ for implementation
 ### Communication Best Practices
 
 **When Describing Changes**:
-- Use file paths with line numbers: `apps/template/dialogue-editor.html:245`
+- Use file paths with line numbers: `apps/dialogue-editor/index.html:245`
 - Be specific about which app is affected
-- Mention if wrapper or template file was changed
 - Provide before/after examples for complex changes
 
 **When Suggesting Workflows**:
@@ -633,9 +608,8 @@ Location: apps/template/ for implementation
 - Note any keyboard shortcuts or interactions to test
 
 **When Encountering Issues**:
-- Read the full template file to understand context
-- Check if issue is in wrapper vs template
-- Verify changes are in the correct file
+- Read the full app file to understand context
+- Verify changes are in the correct file (`apps/[app-name]/index.html`)
 - Suggest local testing steps
 
 ### Code Quality Standards
@@ -678,12 +652,12 @@ Location: apps/template/ for implementation
 
 | File | Purpose | When to Edit |
 |------|---------|--------------|
-| `apps/template/dialogue-editor.html` | Dialogue editor implementation | Adding features, fixing bugs, styling |
-| `apps/template/dialogue-player.html` | Dialogue player implementation | Game mechanics, analytics, visualization |
-| `apps/template/seat-sample-designer.html` | Seat designer implementation | Drawing features, spatial logic |
+| `apps/dialogue-editor/index.html` | Dialogue editor implementation | Adding features, fixing bugs, styling |
+| `apps/dialogue-player/index.html` | Dialogue player implementation | Game mechanics, analytics, visualization |
+| `apps/seat-sample-designer/index.html` | Seat designer implementation | Drawing features, spatial logic |
 | `index.html` | Root landing page | Adding new apps to directory |
-| `serve.sh` | Development server script | Changing default port or serving behavior |
-| `package.json` | npm scripts | Adding new convenience commands |
+| `serve.sh` | Development server script | Rarely (if changing default behavior) |
+| `update.sh` | Git push helper script | Rarely (if customizing workflow) |
 | `CLAUDE.md` | This guide | Documenting new conventions or workflows |
 
 ### Common Commands
@@ -701,40 +675,35 @@ Location: apps/template/ for implementation
 # Via npm (if Node.js installed)
 npm run start
 
-# View files
-ls apps/template/
+# View app files
+ls apps/*/index.html
 
 # Check git status
 git status
 
 # Create new app
-cp -r apps/template apps/my-app
+mkdir -p apps/my-app && nano apps/my-app/index.html
 ```
 
 ### Architecture Cheat Sheet
 
 ```
-User Request → App URL → Wrapper (index.html) →
-    iframe → Template File (actual implementation)
+User Request → App URL → App File
 
 Example:
 http://localhost:8000/apps/dialogue-editor/
     ↓
-apps/dialogue-editor/index.html (wrapper, 405 bytes)
-    ↓
-<iframe src="/apps/template/dialogue-editor.html">
-    ↓
-apps/template/dialogue-editor.html (implementation, 44.9 KB)
+apps/dialogue-editor/index.html (implementation, 44.9 KB)
 ```
 
 ---
 
 ## Conclusion
 
-This repository provides a clean, minimal architecture for hosting multiple static HTML educational apps. The wrapper + template pattern ensures maintainability while the no-build-system approach keeps deployment simple.
+This repository provides a clean, minimal architecture for hosting multiple static HTML educational apps. The simple directory structure and no-build-system approach keeps deployment simple and intuitive.
 
 **Key Takeaways for AI Assistants**:
-- Edit templates in `apps/template/`, not wrappers
+- Edit apps directly in `apps/[app-name]/index.html`
 - Maintain self-contained single-file apps
 - Respect the no-dependencies, vanilla JavaScript approach
 - Always read files before proposing changes
@@ -742,7 +711,7 @@ This repository provides a clean, minimal architecture for hosting multiple stat
 - Follow existing code style and conventions
 
 **Questions or Issues?**
-Refer to WORKSPACE.md for multi-app workspace documentation, or examine the template files directly for implementation details.
+Refer to GUIDE.md for user documentation, or examine the app files directly for implementation details.
 
 ---
 

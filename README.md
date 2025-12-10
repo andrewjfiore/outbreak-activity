@@ -8,16 +8,16 @@ Interactive outbreak investigation simulation exercise featuring interviews, sam
 
 ### 1. Edit Your HTML Apps
 ```
-apps/template/dialogue-editor.html
-apps/template/dialogue-player.html
-apps/template/seat-sample-designer.html
+apps/dialogue-editor/index.html
+apps/dialogue-player/index.html
+apps/seat-sample-designer/index.html
 ```
 
 ### 2. Test Locally
 ```bash
 ./serve.sh
 ```
-Open: **http://localhost:8000/**
+Open: **http://localhost:8000/apps/dialogue-editor/**
 
 ### 3. Push to GitHub
 ```bash
@@ -48,22 +48,9 @@ Open: **http://localhost:8000/**
 
 ## 💡 Key Points
 
-✅ **Edit files in**: `apps/template/`
+✅ **Edit files in**: `apps/[app-name]/index.html`
 ✅ **Test with**: `./serve.sh`
 ✅ **Push with**: `./update.sh`
-
-❌ **Don't edit**: `apps/[app-name]/index.html` (wrappers only)
-
----
-
-## 🏗️ Architecture
-
-**Wrapper + Template Pattern:**
-- Small wrapper files load actual apps via iframe
-- All editable files in `apps/template/`
-- Single source of truth - edit once, updates everywhere
-
-See [GUIDE.md](GUIDE.md) for details.
 
 ---
 
