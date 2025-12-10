@@ -1,0 +1,9 @@
+{
+  "name": "outbreak-activity-webapps",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "bash serve.sh",
+    "start:port": "bash serve.sh 8080"
+  }
+}
