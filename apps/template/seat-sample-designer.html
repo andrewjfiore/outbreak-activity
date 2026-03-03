@@ -1026,6 +1026,12 @@
         <button onclick="saveToFile()" class="btn-primary">
             💾 Save Project
         </button>
+        <button onclick="exportSamplesCSV()" class="btn-secondary" title="Export sample list as CSV">
+            📋 CSV Samples
+        </button>
+        <button onclick="exportPlayersCSV()" class="btn-secondary" title="Export participant list as CSV">
+            👥 CSV Participants
+        </button>
     </div>
 </div>
 
@@ -2285,10 +2291,88 @@
 
     // === STATS ===
     function updateStats() {
-        document.getElementById('stat-total').textContent = players.length;
-        document.getElementById('stat-symptomatic').textContent = players.filter(p => p.symptoms && p.symptoms.length > 0 && p.alive).length;
-        document.getElementById('stat-deceased').textContent = players.filter(p => !p.alive).length;
+        const total = players.length;
+        const symptomatic = players.filter(p => p.symptoms && p.symptoms.length > 0 && p.alive).length;
+        const deceased = players.filter(p => !p.alive).length;
+        document.getElementById('stat-total').textContent = total;
+        document.getElementById('stat-symptomatic').textContent = symptomatic;
+        document.getElementById('stat-deceased').textContent = deceased;
         document.getElementById('stat-sections').textContent = sections.length;
+
+        // Attack rate = (symptomatic + deceased) / total
+        const cases = symptomatic + deceased;
+        const attackRate = total > 0 ? ((cases / total) * 100).toFixed(1) : '0.0';
+        let arEl = document.getElementById('stat-attack-rate');
+        if (!arEl) {
+            // Inject attack rate card after sections card
+            const sectionsCard = document.getElementById('stat-sections')?.closest('.stat-card');
+            if (sectionsCard) {
+                const arCard = document.createElement('div');
+                arCard.className = 'stat-card';
+                arCard.innerHTML = `<div class="stat-label">Attack Rate</div><div class="stat-value" id="stat-attack-rate">0.0%</div>`;
+                sectionsCard.parentNode.insertBefore(arCard, sectionsCard.nextSibling);
+                arEl = document.getElementById('stat-attack-rate');
+            }
+        }
+        if (arEl) {
+            arEl.textContent = attackRate + '%';
+            const card = arEl.closest('.stat-card');
+            if (card) {
+                card.classList.remove('danger', 'warning', 'success');
+                if (parseFloat(attackRate) >= 30) card.classList.add('danger');
+                else if (parseFloat(attackRate) >= 15) card.classList.add('warning');
+                else if (parseFloat(attackRate) > 0) card.classList.add('success');
+            }
+        }
+
+        // Sample summary
+        const envCount = samples.filter(s => s.type === 'environmental').length;
+        const photoCount = samples.filter(s => s.type === 'photo').length;
+        let sEl = document.getElementById('stat-sample-summary');
+        if (!sEl) {
+            const budgetCard = document.getElementById('budget-spent')?.closest('.stat-card');
+            if (budgetCard) {
+                const sCard = document.createElement('div');
+                sCard.className = 'stat-card';
+                sCard.innerHTML = `<div class="stat-label">Samples</div><div class="stat-value" id="stat-sample-summary">0</div>`;
+                budgetCard.parentNode.insertBefore(sCard, budgetCard);
+                sEl = document.getElementById('stat-sample-summary');
+            }
+        }
+        if (sEl) sEl.textContent = `${envCount}E / ${photoCount}P`;
+    }
+
+    // === CSV Export ===
+    function exportSamplesCSV() {
+        if (samples.length === 0) { alert('No samples to export.'); return; }
+        const headers = ['Label', 'Type', 'Test Type', 'Cost', 'X', 'Y', 'Notes'];
+        const rows = samples.map(s => [
+            s.label || '', s.type || '', s.testType || '', s.cost || 0,
+            Math.round(s.x || 0), Math.round(s.y || 0), (s.notes || '').replace(/,/g, ';')
+        ]);
+        const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'samples-export.csv';
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+
+    function exportPlayersCSV() {
+        if (players.length === 0) { alert('No participants to export.'); return; }
+        const headers = ['ID', 'Section', 'Symptomatic', 'Alive', 'Symptoms', 'Notes'];
+        const rows = players.map(p => [
+            p.id || '', p.section || '', (p.symptoms && p.symptoms.length > 0 ? 'Yes' : 'No'),
+            (p.alive !== false ? 'Yes' : 'No'), (p.symptoms || []).join(';'), (p.notes || '').replace(/,/g, ';')
+        ]);
+        const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'participants-export.csv';
+        a.click();
+        URL.revokeObjectURL(a.href);
     }
 
     // === UTILS ===

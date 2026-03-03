@@ -931,6 +931,8 @@
                     <input type="file" class="file-upload-input" id="fileUpload" accept=".json">
                 </div>
                 <button class="btn" onclick="resetGame()">Reset</button>
+                <button class="btn" id="printSummaryBtn" onclick="printSummary()" title="Print / Export summary" style="display:none;">🖨️ Print</button>
+                <button class="btn" id="shortcutsBtn" onclick="toggleShortcutsPanel()" title="Keyboard shortcuts">⌨️</button>
                 <div class="font-size-toggle">
                     <button class="font-size-btn small" onclick="setFontSize('small')" title="Small text">A</button>
                     <button class="font-size-btn medium active" onclick="setFontSize('medium')" title="Medium text">A</button>
@@ -971,6 +973,13 @@
         <aside class="sidebar">
             <div class="stats-panel">
                 <div class="panel-title">Progress</div>
+                <div class="stat-item" id="progressBarContainer" style="flex-direction:column;align-items:flex-start;gap:4px;display:none;">
+                    <span class="stat-label">Scenario Progress</span>
+                    <div style="width:100%;background:var(--border,#2a2a3a);border-radius:4px;height:8px;overflow:hidden;">
+                        <div id="progressBarFill" style="height:100%;width:0%;background:var(--accent-secondary,#22d3ee);border-radius:4px;transition:width 0.4s ease;"></div>
+                    </div>
+                    <span style="font-size:0.7rem;color:var(--text-muted,#9ca3af);" id="progressLabel">0 / 0 nodes visited</span>
+                </div>
                 <div class="stat-item">
                     <span class="stat-label">Time Elapsed</span>
                     <span class="stat-value" id="timeElapsed">0:00</span>
@@ -1747,6 +1756,112 @@
         document.getElementById('treeModal').addEventListener('click', e => e.target.classList.contains('modal-overlay') && closeTreeModal());
         document.getElementById('revealModal').addEventListener('click', e => e.target.classList.contains('modal-overlay') && closeRevealModal());
         document.getElementById('reportModal').addEventListener('click', e => e.target.classList.contains('modal-overlay') && closeReportModal());
+
+        // ─── Progress Bar ─────────────────────────────────────────────────────────
+        function updateProgressBar() {
+            if (!gameState.dialogueData) return;
+            const totalNodes = gameState.dialogueData.nodes.length;
+            const visitedCount = new Set(gameState.history.map(h => h.nodeId)).size;
+            const pct = totalNodes > 0 ? Math.round((visitedCount / totalNodes) * 100) : 0;
+            const bar = document.getElementById('progressBarFill');
+            const label = document.getElementById('progressLabel');
+            const container = document.getElementById('progressBarContainer');
+            if (bar) bar.style.width = pct + '%';
+            if (label) label.textContent = `${visitedCount} / ${totalNodes} nodes visited`;
+            if (container) container.style.display = '';
+        }
+
+        // Patch displayNode to also update the progress bar
+        const _origDisplayNode = displayNode;
+        window.displayNode = function(nodeId, addToHistory) {
+            _origDisplayNode(nodeId, addToHistory);
+            updateProgressBar();
+        };
+
+        // ─── Print / Export Summary ──────────────────────────────────────────────
+        function printSummary() {
+            if (!gameState.dialogueData) return;
+            const elapsed = document.getElementById('timeElapsed').textContent;
+            const title = gameState.dialogueData.title || 'Dialogue Session';
+            const rows = gameState.history.map((item, i) => {
+                const node = gameState.dialogueData.nodes.find(n => n.id === item.nodeId);
+                const path = gameState.pathTaken[i];
+                return `<tr>
+                    <td>${i + 1}</td>
+                    <td>${node?.speaker || 'Narrator'}</td>
+                    <td>${(node?.text || '').replace(/\\n/g, ' ').substring(0, 80)}${(node?.text || '').length > 80 ? '…' : ''}</td>
+                    <td>${path ? path.choiceText : '—'}</td>
+                </tr>`;
+            }).join('');
+
+            const approvalRows = gameState.dialogueData?.approvalTypes?.map(t =>
+                `<tr><td>${t.name}</td><td>${gameState.approvals[t.id] || 0}</td></tr>`
+            ).join('') || '';
+
+            const statRows = Object.entries(gameState.stats).map(([k, v]) =>
+                `<tr><td>${k}</td><td>${v}</td></tr>`
+            ).join('');
+
+            const win = window.open('', '_blank');
+            win.document.write(`<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>${title} — Session Report</title>
+<style>
+body{font-family:Georgia,serif;padding:2rem;max-width:900px;margin:auto;color:#111}
+h1{font-size:1.5rem;margin-bottom:0.25rem}
+.meta{color:#555;font-size:0.85rem;margin-bottom:1.5rem}
+table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:0.85rem}
+th{background:#eee;text-align:left;padding:0.4rem 0.6rem;border:1px solid #ccc}
+td{padding:0.35rem 0.6rem;border:1px solid #ddd;vertical-align:top}
+tr:nth-child(even)td{background:#f9f9f9}
+h2{font-size:1rem;margin:1.5rem 0 0.5rem;border-bottom:1px solid #ccc;padding-bottom:0.25rem}
+@media print{body{padding:1rem}}
+</style></head>
+<body>
+<h1>🦠 ${title} — Session Report</h1>
+<div class="meta">Generated ${new Date().toLocaleString()} · ${elapsed} elapsed · ${gameState.decisionCount} decisions · ${gameState.questionCount} questions · ${gameState.decisionTypeCount} decision-type cards</div>
+<h2>Decision Path</h2>
+<table><thead><tr><th>#</th><th>Speaker</th><th>Dialogue</th><th>Choice Made</th></tr></thead><tbody>${rows}</tbody></table>
+${approvalRows ? `<h2>Approval Ratings</h2><table><thead><tr><th>Stakeholder</th><th>Final Value</th></tr></thead><tbody>${approvalRows}</tbody></table>` : ''}
+${statRows ? `<h2>Acquired Traits / Stats</h2><table><thead><tr><th>Trait</th><th>Value</th></tr></thead><tbody>${statRows}</tbody></table>` : ''}
+<script>window.print();<\/script>
+</body></html>`);
+            win.document.close();
+        }
+
+        // Show print button once a dialogue is loaded
+        const _origFileLoad = document.getElementById('fileUpload').onchange;
+        document.getElementById('fileUpload').addEventListener('change', () => {
+            setTimeout(() => { document.getElementById('printSummaryBtn').style.display = ''; }, 500);
+        });
+
+        // ─── Shortcuts Panel ─────────────────────────────────────────────────────
+        (function injectShortcutsPanel() {
+            const panel = document.createElement('div');
+            panel.id = 'shortcutsPanel';
+            panel.style.cssText = 'display:none;position:fixed;top:60px;right:12px;z-index:900;background:var(--panel-bg,#18181c);border:1px solid var(--border,#2a2a32);border-radius:8px;padding:1rem;min-width:220px;box-shadow:0 8px 32px rgba(0,0,0,0.5);font-size:0.8rem;';
+            panel.innerHTML = `
+                <div style="font-weight:600;margin-bottom:0.75rem;color:var(--accent,#6366f1)">⌨️ Keyboard Shortcuts</div>
+                <table style="border-collapse:collapse;width:100%">
+                <tr><td style="padding:2px 8px 2px 0;color:var(--text-muted,#9ca3af)"><kbd style="background:#333;padding:1px 5px;border-radius:3px;font-size:0.75rem">1–9</kbd></td><td>Select choice</td></tr>
+                <tr><td style="padding:2px 8px 2px 0;color:var(--text-muted,#9ca3af)"><kbd style="background:#333;padding:1px 5px;border-radius:3px;font-size:0.75rem">←</kbd></td><td>Go back</td></tr>
+                <tr><td style="padding:2px 8px 2px 0;color:var(--text-muted,#9ca3af)"><kbd style="background:#333;padding:1px 5px;border-radius:3px;font-size:0.75rem">→</kbd></td><td>Go forward</td></tr>
+                <tr><td style="padding:2px 8px 2px 0;color:var(--text-muted,#9ca3af)"><kbd style="background:#333;padding:1px 5px;border-radius:3px;font-size:0.75rem">Esc</kbd></td><td>Close modal</td></tr>
+                <tr><td style="padding:2px 8px 2px 0;color:var(--text-muted,#9ca3af)"><kbd style="background:#333;padding:1px 5px;border-radius:3px;font-size:0.75rem">⌨️</kbd></td><td>This panel</td></tr>
+                </table>
+            `;
+            document.body.appendChild(panel);
+        })();
+
+        function toggleShortcutsPanel() {
+            const p = document.getElementById('shortcutsPanel');
+            if (p) p.style.display = p.style.display === 'none' ? '' : 'none';
+        }
+
+        document.addEventListener('click', e => {
+            const panel = document.getElementById('shortcutsPanel');
+            const btn = document.getElementById('shortcutsBtn');
+            if (panel && !panel.contains(e.target) && e.target !== btn) panel.style.display = 'none';
+        });
     </script>
 </body>
 </html>
