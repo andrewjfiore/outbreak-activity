@@ -1,0 +1,178 @@
+[
+  {
+    "test": "malformed_json/empty",
+    "category": "Import",
+    "severity": "\ud83d\udfe2",
+    "finding": "Graceful failure: Expecting value: line 1 column 1 (char 0)",
+    "suggestion": "Verify user sees helpful error, not raw exception",
+    "passed": true
+  },
+  {
+    "test": "malformed_json/null",
+    "category": "Import",
+    "severity": "\ud83d\udfe2",
+    "finding": "Graceful failure: Unexpected: 'NoneType' object has no attribute 'get'",
+    "suggestion": "Verify user sees helpful error, not raw exception",
+    "passed": true
+  },
+  {
+    "test": "malformed_json/empty_object",
+    "category": "Import",
+    "severity": "\ud83d\udfe2",
+    "finding": "Graceful failure: Invalid format: missing nodes array",
+    "suggestion": "Verify user sees helpful error, not raw exception",
+    "passed": true
+  },
+  {
+    "test": "malformed_json/missing_nodes",
+    "category": "Import",
+    "severity": "\ud83d\udfe2",
+    "finding": "Graceful failure: Invalid format: missing nodes array",
+    "suggestion": "Verify user sees helpful error, not raw exception",
+    "passed": true
+  },
+  {
+    "test": "malformed_json/nodes_not_array",
+    "category": "Import",
+    "severity": "\ud83d\udfe2",
+    "finding": "Graceful failure: Invalid format: missing nodes array",
+    "suggestion": "Verify user sees helpful error, not raw exception",
+    "passed": true
+  },
+  {
+    "test": "malformed_json/nodes_with_nulls",
+    "category": "Import",
+    "severity": "\ud83d\udfe2",
+    "finding": "Graceful failure: Unexpected: 'NoneType' object is not a mapping",
+    "suggestion": "Verify user sees helpful error, not raw exception",
+    "passed": true
+  },
+  {
+    "test": "malformed_json/empty_nodes",
+    "category": "Import",
+    "severity": "\ud83d\udfe2",
+    "finding": "Graceful failure: Invalid format: missing nodes array",
+    "suggestion": "Verify user sees helpful error, not raw exception",
+    "passed": true
+  },
+  {
+    "test": "malformed_json/truncated",
+    "category": "Import",
+    "severity": "\ud83d\udfe2",
+    "finding": "Graceful failure: Expecting value: line 1 column 50 (char 49)",
+    "suggestion": "Verify user sees helpful error, not raw exception",
+    "passed": true
+  },
+  {
+    "test": "xss_dialogue/<script>alert(\"XSS\")</script>",
+    "category": "XSS",
+    "severity": "\ud83d\udd34",
+    "finding": "XSS payload stored verbatim in dialogue text: <script>alert(\"XSS\")</script>",
+    "suggestion": "Use escapeHtml() (already defined in editor) on all text fields before rendering. Audit all innerHTML assignments \u2014 especially in renderNodeList() and choice rendering. Use DOMPurify for rich text or textContent for plain text.",
+    "passed": false
+  },
+  {
+    "test": "xss_dialogue/\"><img src=x onerror=alert(1)>",
+    "category": "XSS",
+    "severity": "\ud83d\udd34",
+    "finding": "XSS payload stored verbatim in dialogue text: \"><img src=x onerror=alert(1)>",
+    "suggestion": "Use escapeHtml() (already defined in editor) on all text fields before rendering. Audit all innerHTML assignments \u2014 especially in renderNodeList() and choice rendering. Use DOMPurify for rich text or textContent for plain text.",
+    "passed": false
+  },
+  {
+    "test": "xss_dialogue/<svg/onload=alert(document.dom",
+    "category": "XSS",
+    "severity": "\ud83d\udd34",
+    "finding": "XSS payload stored verbatim in dialogue text: <svg/onload=alert(document.domain)>",
+    "suggestion": "Use escapeHtml() (already defined in editor) on all text fields before rendering. Audit all innerHTML assignments \u2014 especially in renderNodeList() and choice rendering. Use DOMPurify for rich text or textContent for plain text.",
+    "passed": false
+  },
+  {
+    "test": "xss_dialogue/javascript:alert(1)",
+    "category": "XSS",
+    "severity": "\ud83d\udd34",
+    "finding": "XSS payload stored verbatim in dialogue text: javascript:alert(1)",
+    "suggestion": "Use escapeHtml() (already defined in editor) on all text fields before rendering. Audit all innerHTML assignments \u2014 especially in renderNodeList() and choice rendering. Use DOMPurify for rich text or textContent for plain text.",
+    "passed": false
+  },
+  {
+    "test": "xss_dialogue/<iframe src=\"javascript:alert(",
+    "category": "XSS",
+    "severity": "\ud83d\udd34",
+    "finding": "XSS payload stored verbatim in dialogue text: <iframe src=\"javascript:alert(1)\"></iframe>",
+    "suggestion": "Use escapeHtml() (already defined in editor) on all text fields before rendering. Audit all innerHTML assignments \u2014 especially in renderNodeList() and choice rendering. Use DOMPurify for rich text or textContent for plain text.",
+    "passed": false
+  },
+  {
+    "test": "xss_dialogue/<script>alert(1)</script>",
+    "category": "XSS",
+    "severity": "\ud83d\udd34",
+    "finding": "XSS payload stored verbatim in dialogue text: <script>alert(1)</script>",
+    "suggestion": "Use escapeHtml() (already defined in editor) on all text fields before rendering. Audit all innerHTML assignments \u2014 especially in renderNodeList() and choice rendering. Use DOMPurify for rich text or textContent for plain text.",
+    "passed": false
+  },
+  {
+    "test": "circular/two_node_loop",
+    "category": "Logic",
+    "severity": "\ud83d\udfe1",
+    "finding": "Circular node reference (A\u2192B\u2192A) imported without warning",
+    "suggestion": "In dialogue-player.html, detect cycles during playback (track visited node IDs) to prevent infinite loops",
+    "passed": false
+  },
+  {
+    "test": "circular/self_reference",
+    "category": "Logic",
+    "severity": "\ud83d\udd34",
+    "finding": "Self-referencing node (A\u2192A) accepted \u2014 will cause infinite loop in player",
+    "suggestion": "Detect self-references during import and warn; in player add visited-node tracking with max depth limit",
+    "passed": false
+  },
+  {
+    "test": "huge_nodes/5000_nodes",
+    "category": "Performance",
+    "severity": "\ud83d\udfe2",
+    "finding": "5000 nodes: 0.015s (1.5MB) \u2014 OK",
+    "suggestion": "",
+    "passed": true
+  },
+  {
+    "test": "huge_nodes/10000_choices",
+    "category": "Performance",
+    "severity": "\ud83d\udfe2",
+    "finding": "10,000 choices: 0.039s \u2014 OK",
+    "suggestion": "",
+    "passed": true
+  },
+  {
+    "test": "bad_start/nonexistent",
+    "category": "Logic",
+    "severity": "\ud83d\udfe1",
+    "finding": "Dialogue with invalid startNode accepted \u2014 player will fail to start",
+    "suggestion": "Validate startNode references an existing node ID at import time",
+    "passed": false
+  },
+  {
+    "test": "bad_start/empty",
+    "category": "Logic",
+    "severity": "\ud83d\udfe1",
+    "finding": "Dialogue with empty startNode accepted",
+    "suggestion": "Require non-empty startNode or auto-set to first node",
+    "passed": false
+  },
+  {
+    "test": "duplicate_ids/nodes",
+    "category": "Logic",
+    "severity": "\ud83d\udfe1",
+    "finding": "Dialogue with duplicate node IDs imported without warning \u2014 last one silently wins",
+    "suggestion": "Check for duplicate node IDs during import and warn user",
+    "passed": false
+  },
+  {
+    "test": "server/availability",
+    "category": "Server",
+    "severity": "\ud83d\udfe1",
+    "finding": "Server not running \u2014 skipping HTTP fuzz tests",
+    "suggestion": "Start with: cd /home/andrew/repos/outbreak-activity && python3 serve_dynamic.py 8000",
+    "passed": false
+  }
+]

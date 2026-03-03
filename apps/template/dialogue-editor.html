@@ -622,8 +622,11 @@
 
         <aside class="sidebar">
             <div class="sidebar-header">
-                <span class="sidebar-title">Dialogue Nodes</span>
+                <span class="sidebar-title">Dialogue Nodes <span id="nodeCountBadge" style="font-size:0.65rem;background:var(--accent-gold,#c9a227);color:var(--bg-deep,#0a0a0f);border-radius:10px;padding:1px 6px;margin-left:4px;font-family:monospace;">0</span></span>
                 <button class="btn" onclick="addNode()">+ Add</button>
+            </div>
+            <div style="padding:0.5rem;border-bottom:1px solid var(--border);">
+                <input type="text" id="nodeSearchInput" placeholder="🔍 Search nodes…" style="width:100%;padding:0.4rem 0.6rem;background:var(--bg-input);border:1px solid var(--border);color:var(--text-primary);font-size:0.8rem;border-radius:3px;font-family:inherit;" oninput="renderNodeList()" />
             </div>
             <div class="node-list" id="nodeList"></div>
         </aside>
@@ -742,10 +745,20 @@
             });
         }
 
-        // Node List
+        // Node List (with search/filter support)
         function renderNodeList() {
             const list = document.getElementById('nodeList');
-            list.innerHTML = project.nodes.map((node, index) => `
+            const query = (document.getElementById('nodeSearchInput')?.value || '').toLowerCase().trim();
+            const filtered = project.nodes.map((node, index) => ({ node, index })).filter(({ node }) => {
+                if (!query) return true;
+                return (node.id || '').toLowerCase().includes(query) ||
+                       (node.text || '').toLowerCase().includes(query) ||
+                       (node.speaker || '').toLowerCase().includes(query);
+            });
+
+            list.innerHTML = filtered.length === 0
+                ? `<div style="padding:1rem;color:var(--text-muted);font-size:0.8rem;text-align:center;">No nodes match "${query}"</div>`
+                : filtered.map(({ node, index }) => `
                 <div class="node-item ${index === currentNodeIndex ? 'active' : ''} ${node.id === project.startNode ? 'start-node' : ''}" 
                      onclick="selectNode(${index})">
                     <div class="node-id">${node.id || 'unnamed'}</div>
@@ -1306,9 +1319,30 @@
                 } else if (e.key === 'n') {
                     e.preventDefault();
                     addNode();
+                } else if (e.key === 'f') {
+                    e.preventDefault();
+                    const search = document.getElementById('nodeSearchInput');
+                    if (search) { search.focus(); search.select(); }
+                }
+            }
+            // Escape to clear search
+            if (e.key === 'Escape') {
+                const search = document.getElementById('nodeSearchInput');
+                if (search && document.activeElement === search) {
+                    search.value = '';
+                    renderNodeList();
+                    search.blur();
                 }
             }
         });
+
+        // Patch renderNodeList to update node count badge
+        const _origRenderNodeList = renderNodeList;
+        window.renderNodeList = function() {
+            _origRenderNodeList();
+            const badge = document.getElementById('nodeCountBadge');
+            if (badge) badge.textContent = project.nodes.length;
+        };
 
         // Initialize
         init();

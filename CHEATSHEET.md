@@ -1,169 +1,79 @@
-# 📋 CHEATSHEET - Copy & Paste Edition
+# 📋 CHEATSHEET
 
-## Your 3 Main Files
+## Your 3 Files
 ```
-apps/template/dialogue-editor.html       ← Edit this one
-apps/template/dialogue-player.html       ← Edit this one
-apps/template/seat-sample-designer.html  ← Edit this one
+apps/template/dialogue-editor.html
+apps/template/dialogue-player.html
+apps/template/seat-sample-designer.html
 ```
 
 ## Essential Commands
 
-### Start Local Server
 ```bash
-./serve.sh
-```
-Then open: http://localhost:8000/
+./serve.sh              # Start local server → http://localhost:8000/
+./update.sh             # Commit + push (interactive)
 
-### Easy Update Script (Recommended!)
-```bash
-./update.sh
-```
-It will ask for a commit message and push everything for you.
+git status              # See changes
+git add .               # Stage all
+git commit -m "msg"     # Commit
+git push                # Push
 
-### Manual Git Commands
-```bash
-# See what changed
-git status
-
-# Add everything
-git add .
-
-# Commit with message
-git commit -m "Your message here"
-
-# Push to GitHub
-git push
-```
-
-### Emergency: Undo Last Commit (Not Pushed)
-```bash
-git reset --soft HEAD~1
-```
-
-### Emergency: Discard All Changes
-```bash
-git checkout -- .
+git reset --soft HEAD~1 # Undo last commit (not pushed)
+git checkout -- .       # Discard all changes
 ```
 
 ---
 
-## File Structure (Visual)
+## File Structure
 
 ```
 outbreak-activity/
-│
-├── 📄 README.md              ← Start here
-├── 📄 QUICK-START.md         ← Quick commands
-├── 📄 HOW-TO-USE.md          ← Full guide
-├── 📄 CHEATSHEET.md          ← This file
-│
-├── 🚀 serve.sh               ← Run to test
-├── 🚀 update.sh              ← Run to push
-│
-├── 🌐 index.html             ← Landing page
-│
+├── 🚀 serve.sh / update.sh
+├── 🌐 index.html
 └── 📁 apps/
-    ├── 📁 dialogue-editor/
-    │   └── index.html        (wrapper - don't edit)
-    │
-    ├── 📁 dialogue-player/
-    │   └── index.html        (wrapper - don't edit)
-    │
-    ├── 📁 seat-sample-designer/
-    │   └── index.html        (wrapper - don't edit)
-    │
-    └── 📁 template/          ← EDIT FILES HERE! ⭐
-        ├── dialogue-editor.html       ✏️ EDIT THIS
-        ├── dialogue-player.html       ✏️ EDIT THIS
-        └── seat-sample-designer.html  ✏️ EDIT THIS
+    ├── 📁 dialogue-editor/index.html     (wrapper — don't edit)
+    ├── 📁 dialogue-player/index.html     (wrapper — don't edit)
+    ├── 📁 seat-sample-designer/index.html (wrapper — don't edit)
+    └── 📁 template/                       ← EDIT HERE ⭐
+        ├── dialogue-editor.html       ✏️
+        ├── dialogue-player.html       ✏️
+        └── seat-sample-designer.html  ✏️
 ```
 
 ---
 
-## URLs When Running Locally
+## Local URLs
 
-| What | URL |
-|------|-----|
+| App | URL |
+|-----|-----|
 | Home | http://localhost:8000/ |
-| Dialogue Editor | http://localhost:8000/apps/dialogue-editor/ |
-| Dialogue Player | http://localhost:8000/apps/dialogue-player/ |
+| Editor | http://localhost:8000/apps/dialogue-editor/ |
+| Player | http://localhost:8000/apps/dialogue-player/ |
 | Seat Designer | http://localhost:8000/apps/seat-sample-designer/ |
 
 ---
 
-## Typical Workflow
+## Workflow
 
-1. **Edit** your HTML files in `apps/template/`
-2. **Test** by running `./serve.sh`
-3. **Check** in browser at http://localhost:8000/
-4. **Push** by running `./update.sh`
-5. **Done!**
+1. Edit `apps/template/` → 2. `./serve.sh` → 3. Check browser → 4. `./update.sh`
 
 ---
 
-## Common Issues
+## Fixes
 
-### "Permission denied" on scripts
 ```bash
-chmod +x serve.sh update.sh
+chmod +x serve.sh update.sh           # Permission denied
+ps aux | grep python && kill [PID]    # Port in use
+git pull && git push                  # Push rejected
 ```
 
-### "Address already in use"
-```bash
-# Find and kill the process
-ps aux | grep python
-kill [PID_NUMBER]
-
-# Or use a different port
-./serve.sh 8080
-```
-
-### "Changes not showing"
-- Hard refresh: **Ctrl+Shift+R** (Windows/Linux) or **Cmd+Shift+R** (Mac)
-- Or clear browser cache
-
-### "Git won't let me push"
-```bash
-# Pull latest changes first
-git pull
-
-# Then push
-git push
-```
-
----
-
-## File Names Reference
-
-If you're renaming files, they must match exactly:
-
-| Template File | Accessed Via |
-|---------------|--------------|
-| `dialogue-editor.html` | `/apps/dialogue-editor/` |
-| `dialogue-player.html` | `/apps/dialogue-player/` |
-| `seat-sample-designer.html` | `/apps/seat-sample-designer/` |
+Hard refresh: **Ctrl+Shift+R** / **Cmd+Shift+R**
 
 ---
 
 ## Quick Checks
 
-### Did I edit the right file?
-✅ YES if path contains: `apps/template/`
-❌ NO if path contains: `apps/dialogue-editor/index.html` (that's just a wrapper)
-
-### Is my server running?
-```bash
-ps aux | grep python
-```
-If you see `http.server`, it's running!
-
-### What's my current git branch?
-```bash
-git branch
-```
-The one with `*` is your current branch.
-
----
-
-**Print this and keep it next to your computer!** 📌
+- ✅ Right file? Path has `apps/template/`
+- ❌ Wrong file? `apps/[name]/index.html` = wrapper only
+- Server running? `ps aux | grep python`
+- Current branch? `git branch`
