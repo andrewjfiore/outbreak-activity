@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Outbreak Scene &amp; Sample Designer</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%232d8a8a'/%3E%3Ccircle cx='16' cy='16' r='5.5' fill='%230a0a0f'/%3E%3C/svg%3E">
     <style>
         :root {
             --bg-color: #0f0f12;
@@ -1158,6 +1159,14 @@
     if (!sections.length && !players.length) buildHarvestDemo();
     renderScene();
     updateStats();
+    applyRoleFromURL();
+
+    // Let a role-selector link open the right mode, e.g. seat-sample-designer.html?role=sample
+    function applyRoleFromURL() {
+        const q = (location.search + location.hash).toLowerCase();
+        if (q.includes('sample')) setAppMode('sample');
+        else if (q.includes('view')) setAppMode('view');
+    }
 
     function buildHarvestDemo() {
         sections = [
