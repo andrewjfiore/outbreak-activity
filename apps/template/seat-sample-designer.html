@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Orchestra Layout Designer Pro</title>
+    <title>Outbreak Scene &amp; Sample Designer</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%232d8a8a'/%3E%3Ccircle cx='16' cy='16' r='5.5' fill='%230a0a0f'/%3E%3C/svg%3E">
     <style>
         :root {
             --bg-color: #0f0f12;
@@ -805,7 +806,7 @@
                 <span class="icon">⬠</span> Section
             </button>
             <button id="btn-player" class="tool-btn" onclick="setTool('add_player')">
-                <span class="icon">●</span> Player
+                <span class="icon">●</span> Person
             </button>
             <button id="btn-delete" class="tool-btn danger" onclick="deleteSelected()">
                 <span class="icon">🗑</span> Delete
@@ -917,7 +918,7 @@
 
             <div id="player-fields" class="hidden">
                 <div class="props-section">
-                    <h4>Player Details</h4>
+                    <h4>Person Details</h4>
                     <div class="prop-row">
                         <div class="prop-group">
                             <label>Age</label>
@@ -1061,7 +1062,7 @@
     <div id="stats-bar">
         <div class="stat-card">
             <div class="stat-value" id="stat-total">0</div>
-            <div class="stat-label">Total Players</div>
+            <div class="stat-label">Total People</div>
         </div>
         <div class="stat-card warning">
             <div class="stat-value" id="stat-symptomatic">0</div>
@@ -1151,6 +1152,67 @@
     setupEventHandlers();
     setupAutoUpdate();
     updateStats();
+
+    // Load a ready-made scene so students can explore and collect samples right away.
+    // (Loading a file, below, replaces it.) This is the same event as the "Harvest Dinner"
+    // interview case, so the two apps tell one story.
+    if (!sections.length && !players.length) buildHarvestDemo();
+    renderScene();
+    updateStats();
+    applyRoleFromURL();
+
+    // Let a role-selector link open the right mode, e.g. seat-sample-designer.html?role=sample
+    function applyRoleFromURL() {
+        const q = (location.search + location.hash).toLowerCase();
+        if (q.includes('sample')) setAppMode('sample');
+        else if (q.includes('view')) setAppMode('view');
+    }
+
+    function buildHarvestDemo() {
+        sections = [
+            { id: 'table_rose',  name: 'Rose Table',    color: '#c0607f', polygon_points: '100,100 300,100 300,180 100,180', label_pos: { x: 200, y: 145 } },
+            { id: 'table_oak',   name: 'Oak Table',     color: '#6f9f6f', polygon_points: '360,100 560,100 560,180 360,180', label_pos: { x: 460, y: 145 } },
+            { id: 'table_maple', name: 'Maple Table',   color: '#c9a227', polygon_points: '100,240 300,240 300,320 100,320', label_pos: { x: 200, y: 285 } },
+            { id: 'table_cedar', name: 'Cedar Table',   color: '#5b7fc9', polygon_points: '360,240 560,240 560,320 360,320', label_pos: { x: 460, y: 285 } },
+            { id: 'dessert',     name: 'Dessert Table', color: '#b87333', polygon_points: '250,380 410,380 410,430 250,430', label_pos: { x: 330, y: 408 } }
+        ];
+        const ILL_A = [{ name: 'Vomiting', severity: 'severe' }, { name: 'Stomach cramps', severity: 'moderate' }];
+        const ILL_B = [{ name: 'Diarrhea', severity: 'moderate' }, { name: 'Nausea', severity: 'mild' }];
+        const names = ['Marcus', 'Priya', 'Dale', 'Rosa', 'Ken', 'Ada', 'Sam', 'Lena', 'Iris', 'Theo',
+                       'Nina', 'Omar', 'Gwen', 'Cole', 'Beth', 'Hugo', 'Mara', 'Jude', 'Faye', 'Rex'];
+        // Everyone who ate the tiramisu got sick; everyone who skipped it stayed well.
+        const rows = [
+            { sec: 'table_rose',  y: 140, xs: [120, 160, 200, 240, 280], ate: [true, true, true, false, true] },
+            { sec: 'table_oak',   y: 140, xs: [380, 420, 460, 500, 540], ate: [true, false, true, true, false] },
+            { sec: 'table_maple', y: 280, xs: [120, 160, 200, 240, 280], ate: [true, true, false, true, true] },
+            { sec: 'table_cedar', y: 280, xs: [380, 420, 460, 500, 540], ate: [false, true, false, false, true] }
+        ];
+        players = [];
+        let n = 0;
+        rows.forEach(row => {
+            row.ate.forEach((ate, i) => {
+                players.push({
+                    id: 'p_' + (n + 1),
+                    section_id: row.sec,
+                    x: row.xs[i],
+                    y: row.y,
+                    name: names[n] || ('Guest ' + (n + 1)),
+                    age: 22 + ((n * 7) % 55),
+                    alive: true,
+                    instrument: '',
+                    symptoms: ate ? (n % 2 ? ILL_A.slice() : ILL_B.slice()) : [],
+                    history: ate ? 'Ate the tiramisu at dessert.' : 'Did not have dessert.',
+                    view_dimmed: false,
+                    view_marked: false,
+                    custom_color: null
+                });
+                n++;
+            });
+        });
+        samples = [];
+        nextEnvSampleNum = 1;
+        nextPhotoNum = 1;
+    }
 
     // === THEME ===
     function setTheme(mode) {
@@ -1420,7 +1482,7 @@
             id: `player_${Date.now()}`,
             section_id: assignedSection,
             x, y,
-            name: `Player ${players.length + 1}`,
+            name: `Guest ${players.length + 1}`,
             age: 30,
             alive: true,
             instrument: '',
@@ -1985,7 +2047,7 @@
                 <div class="avatar">${initials}</div>
                 <div>
                     <div class="name">${p.name}</div>
-                    <div class="subtitle">${p.instrument ? formatInstrument(p.instrument) : 'Unassigned'} · ${sect ? sect.name : 'No Section'}</div>
+                    <div class="subtitle">${p.instrument ? formatInstrument(p.instrument) + ' · ' : ''}${sect ? sect.name : 'No Section'}</div>
                 </div>
             </div>
             <div class="tooltip-body">

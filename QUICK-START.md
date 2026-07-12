@@ -1,8 +1,19 @@
 # ⚡ QUICK START
 
+## Play it (no server needed)
+
+Open **`index.html`** and pick a role — **Investigator**, **Field & Lab Team**, or **Facilitator**. That's it.
+
+- Works when you **open the file directly**, from a **shared drive/link**, or on **GitHub Pages** (Settings → Pages → deploy from your branch, root folder).
+- A full outbreak case ("The Harvest Dinner") and a demo scene are **built in** — nothing to upload to start.
+
+---
+
+## Edit & publish (facilitators)
+
 ```bash
 # Edit apps/template/*.html, then:
-./serve.sh                                        # Test
+./serve.sh                                        # Optional: preview locally
 git add . && git commit -m "Update" && git push   # Push
 ```
 

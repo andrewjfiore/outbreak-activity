@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dialogue Player</title>
+    <title>Outbreak Investigation — Field Interviews</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23c9a227'/%3E%3Ccircle cx='16' cy='16' r='5.5' fill='%230a0a0f'/%3E%3C/svg%3E">
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         * {
@@ -919,41 +920,62 @@
             .sidebar { order: -1; flex-direction: row; flex-wrap: wrap; }
             .stats-panel { flex: 1; min-width: 200px; }
         }
+
+        /* ─── Start / briefing screen ───────────────────────────── */
+        .start-screen { max-width: 700px; width: 92%; text-align: center; padding: 2.75rem 2rem; }
+        .brand-kicker { font-family:'JetBrains Mono',monospace; font-size:0.7rem; letter-spacing:0.35em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.85rem; }
+        .brand-title { font-size: calc(2.2rem * var(--font-scale)); font-weight:600; color:var(--accent-gold); letter-spacing:0.03em; line-height:1.12; margin-bottom:0.6rem; }
+        .brand-sub { color:var(--text-secondary); font-size:calc(1.02rem * var(--font-scale)); margin:0 auto 2rem; max-width:34rem; }
+        .case-prompt { font-family:'JetBrains Mono',monospace; font-size:0.68rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.9rem; text-align:left; }
+        .case-grid { display:flex; flex-direction:column; gap:0.9rem; text-align:left; }
+        .case-card { display:block; width:100%; background:var(--bg-elevated); border:1px solid var(--border); border-left:3px solid var(--accent-gold); border-radius:8px; padding:1.15rem 1.3rem; cursor:pointer; transition:transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease; font-family:inherit; color:inherit; }
+        .case-card:hover, .case-card:focus-visible { border-color:var(--accent-gold); transform:translateY(-2px); box-shadow:0 10px 26px rgba(0,0,0,0.35); outline:none; }
+        .case-card-top { display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem; flex-wrap:wrap; }
+        .case-card-name { font-size:calc(1.18rem * var(--font-scale)); color:var(--text-primary); font-weight:600; }
+        .case-badge { font-family:'JetBrains Mono',monospace; font-size:0.58rem; letter-spacing:0.12em; text-transform:uppercase; padding:0.22rem 0.55rem; border-radius:20px; background:rgba(201,162,39,0.16); color:var(--accent-gold); }
+        .case-meta { font-family:'JetBrains Mono',monospace; font-size:0.66rem; color:var(--text-muted); margin-left:auto; white-space:nowrap; }
+        .case-card-desc { font-size:calc(0.96rem * var(--font-scale)); color:var(--text-secondary); line-height:1.55; }
+        .case-card-go { margin-top:0.7rem; font-family:'JetBrains Mono',monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent-gold); }
+        .start-foot { margin-top:1.9rem; padding-top:1.3rem; border-top:1px solid var(--border); font-size:0.85rem; color:var(--text-muted); display:flex; flex-direction:column; gap:0.6rem; align-items:center; }
+        .start-link { background:none; border:none; color:var(--accent-teal); font-family:'JetBrains Mono',monospace; font-size:0.74rem; cursor:pointer; text-decoration:underline; letter-spacing:0.04em; padding:0; }
+        .start-link:hover { color:var(--accent-gold); }
+
+        /* ─── Numbered choice keycaps (game feel) ───────────────── */
+        .choice-key { font-family:'JetBrains Mono',monospace; font-size:calc(0.72rem * var(--font-scale)); font-weight:600; min-width:1.5rem; height:1.5rem; padding:0 0.35rem; display:flex; align-items:center; justify-content:center; border:1px solid var(--border); border-radius:5px; color:var(--text-muted); background:var(--bg-deep); flex-shrink:0; }
+        .choice-btn:hover .choice-key { border-color:var(--accent-gold); color:var(--accent-gold); }
     </style>
 </head>
 <body class="font-medium">
     <div class="container">
         <header class="header">
-            <h1 class="title">Dialogue Player</h1>
+            <h1 class="title" id="appTitle">Outbreak Investigation</h1>
             <div class="header-actions">
-                <div class="file-upload-wrapper">
-                    <button class="btn">Upload JSON</button>
-                    <input type="file" class="file-upload-input" id="fileUpload" accept=".json">
-                </div>
-                <button class="btn" onclick="resetGame()">Reset</button>
-                <button class="btn" id="printSummaryBtn" onclick="printSummary()" title="Print / Export summary" style="display:none;">🖨️ Print</button>
-                <button class="btn" id="shortcutsBtn" onclick="toggleShortcutsPanel()" title="Keyboard shortcuts">⌨️</button>
+                <button class="btn" onclick="openStartScreen()" title="Choose a case">☰ Cases</button>
+                <button class="btn" onclick="resetGame()" title="Restart this case from the beginning">Restart</button>
+                <button class="btn" id="printSummaryBtn" onclick="printSummary()" title="Print or export your report" style="display:none;">Print report</button>
+                <button class="btn" id="shortcutsBtn" onclick="toggleShortcutsPanel()" title="Keyboard shortcuts">⌨</button>
                 <div class="font-size-toggle">
-                    <button class="font-size-btn small" onclick="setFontSize('small')" title="Small text">A</button>
-                    <button class="font-size-btn medium active" onclick="setFontSize('medium')" title="Medium text">A</button>
-                    <button class="font-size-btn large" onclick="setFontSize('large')" title="Large text">A</button>
+                    <button class="font-size-btn small" onclick="setFontSize('small')" title="Smaller text">A</button>
+                    <button class="font-size-btn medium active" onclick="setFontSize('medium')" title="Default text size">A</button>
+                    <button class="font-size-btn large" onclick="setFontSize('large')" title="Larger text">A</button>
                 </div>
-                <button class="btn icon-btn" id="themeToggle" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+                <button class="btn icon-btn" id="themeToggle" onclick="toggleTheme()" title="Switch light / dark">🌙</button>
             </div>
+            <input type="file" class="file-upload-input" id="fileUpload" accept=".json" style="display:none;">
         </header>
 
         <main class="main-content">
             <div class="dialogue-container" id="dialogueContainer">
                 <div class="empty-state" id="emptyState">
-                    <div class="empty-state-icon">◇</div>
-                    <p>No dialogue loaded. Upload a JSON file to begin.</p>
+                    <div class="empty-state-icon">🦠</div>
+                    <p>No case open yet. Choose one from <strong>☰ Cases</strong> to begin.</p>
                 </div>
                 <div id="dialogueContent" style="display: none;">
                     <div class="dialogue-header">
                         <div class="speaker-name" id="speakerName"></div>
                         <div class="card-type-buttons">
-                            <button class="card-type-btn question" id="btnQuestion" onclick="toggleCardType('question')" title="Mark as Question">?</button>
-                            <button class="card-type-btn decision" id="btnDecision" onclick="toggleCardType('decision')" title="Mark as Discussion">!</button>
+                            <button class="card-type-btn question" id="btnQuestion" onclick="toggleCardType('question')" title="Flag: a question I still want answered">?</button>
+                            <button class="card-type-btn decision" id="btnDecision" onclick="toggleCardType('decision')" title="Flag: a key decision point">!</button>
                         </div>
                     </div>
                     <div class="dialogue-text" id="dialogueText"></div>
@@ -974,7 +996,7 @@
             <div class="stats-panel">
                 <div class="panel-title">Progress</div>
                 <div class="stat-item" id="progressBarContainer" style="flex-direction:column;align-items:flex-start;gap:4px;display:none;">
-                    <span class="stat-label">Scenario Progress</span>
+                    <span class="stat-label">Case Progress</span>
                     <div style="width:100%;background:var(--border,#2a2a3a);border-radius:4px;height:8px;overflow:hidden;">
                         <div id="progressBarFill" style="height:100%;width:0%;background:var(--accent-secondary,#22d3ee);border-radius:4px;transition:width 0.4s ease;"></div>
                     </div>
@@ -989,7 +1011,7 @@
                     <span class="stat-value" id="decisionCount">0</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Current Node</span>
+                    <span class="stat-label">Speaking With</span>
                     <span class="stat-value" id="currentNode">—</span>
                 </div>
                 <div class="card-counts">
@@ -1014,12 +1036,12 @@
     <!-- Reveal Modal -->
     <div class="modal-overlay" id="revealModal">
         <div class="modal reveal-modal">
-            <h2 class="reveal-title">🎭 Journey Complete</h2>
+            <h2 class="reveal-title">Case Debrief</h2>
             <p class="reveal-subtitle" id="revealSubtitle"></p>
             <div class="reveal-stats" id="revealStats"></div>
             <div class="modal-actions">
-                <button class="btn" onclick="closeRevealModal()">Continue</button>
-                <button class="btn btn-primary" onclick="openTreeModal()">View Decision Tree</button>
+                <button class="btn" onclick="closeRevealModal()">Close</button>
+                <button class="btn btn-primary" onclick="openTreeModal()">See your path</button>
             </div>
         </div>
     </div>
@@ -1028,12 +1050,12 @@
     <div class="modal-overlay" id="treeModal">
         <div class="modal tree-modal">
             <div class="tree-header">
-                <h2 class="modal-title" style="margin-bottom:0">Your Journey</h2>
+                <h2 class="modal-title" style="margin-bottom:0">Your Path Through the Case</h2>
                 <div class="tree-legend">
-                    <div class="legend-item"><span class="legend-color selected"></span> Your Path</div>
-                    <div class="legend-item"><span class="legend-color unselected"></span> Other Paths</div>
-                    <div class="legend-item"><span class="legend-color question"></span> Question (?)</div>
-                    <div class="legend-item"><span class="legend-color decision"></span> Discussion (!)</div>
+                    <div class="legend-item"><span class="legend-color selected"></span> The path you took</div>
+                    <div class="legend-item"><span class="legend-color unselected"></span> Paths you didn't</div>
+                    <div class="legend-item"><span class="legend-color question"></span> Flagged ?</div>
+                    <div class="legend-item"><span class="legend-color decision"></span> Flagged !</div>
                 </div>
             </div>
             <div class="tree-container" id="treeContainer">
@@ -1058,11 +1080,26 @@
     <!-- Report Modal -->
     <div class="modal-overlay" id="reportModal">
         <div class="modal report-modal">
-            <h2 class="modal-title">📋 Journey Report</h2>
+            <h2 class="modal-title">After-Action Report</h2>
             <div class="report-content" id="reportContent"></div>
             <div class="modal-actions">
                 <button class="btn" onclick="closeReportModal()">Close</button>
-                <button class="btn btn-primary" onclick="openTreeModal(); closeReportModal();">View Decision Tree</button>
+                <button class="btn btn-primary" onclick="openTreeModal(); closeReportModal();">See your path</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start / Briefing Screen -->
+    <div class="modal-overlay" id="startModal">
+        <div class="modal start-screen">
+            <div class="brand-kicker">Field Epidemiology · Training Simulation</div>
+            <h1 class="brand-title">Outbreak Investigation</h1>
+            <p class="brand-sub">You're the public-health investigator. Interview the people involved, follow the evidence, and figure out what made everyone sick — one conversation at a time.</p>
+            <div class="case-prompt">Choose a case to begin</div>
+            <div class="case-grid" id="caseGrid"></div>
+            <div class="start-foot">
+                <span>Nothing to install. Works on any laptop, tablet, or shared classroom screen.</span>
+                <button class="start-link" onclick="document.getElementById('fileUpload').click()">Have your own case file? Load a JSON →</button>
             </div>
         </div>
     </div>
@@ -1194,32 +1231,33 @@
             document.getElementById('dialogueContent').style.display = 'block';
             document.getElementById('speakerName').textContent = node.speaker || 'Narrator';
             document.getElementById('dialogueText').textContent = (node.text || '').replace(/\\n/g, '\n');
-            document.getElementById('currentNode').textContent = nodeId;
+            document.getElementById('currentNode').textContent = node.speaker || 'Narrator';
             updateCardTypeButtons();
 
             const choicesEl = document.getElementById('choicesContainer');
             const filtered = filterChoicesByCondition(node.choices);
 
             if (filtered.length > 0) {
-                choicesEl.innerHTML = filtered.map(c => {
+                choicesEl.innerHTML = filtered.map((c, i) => {
                     const types = [];
                     if (c.type === 'question' || c.type === 'both') types.push('question');
                     if (c.type === 'decision' || c.type === 'both') types.push('decision');
                     const cardClass = types.length === 2 ? 'both-card' : types[0] ? types[0] + '-card' : '';
                     const markers = types.length ? '<span class="card-markers">' + types.map(t => `<span class="card-marker ${t}">${t === 'question' ? '?' : '!'}</span>`).join('') + '</span>' : '';
+                    const keycap = i < 9 ? `<span class="choice-key">${i + 1}</span>` : '';
                     const origIdx = node.choices.indexOf(c);
-                    return `<button class="choice-btn ${cardClass}" onclick="makeChoice(${origIdx})">${markers}<span class="choice-text">${(c.text || '').replace(/\\n/g, '\n')}</span></button>`;
+                    return `<button class="choice-btn ${cardClass}" onclick="makeChoice(${origIdx})">${keycap}${markers}<span class="choice-text">${(c.text || '').replace(/\\n/g, '\n')}</span></button>`;
                 }).join('');
             } else {
                 const nextNode = getConditionalNext(node);
                 if (nextNode) {
-                    choicesEl.innerHTML = `<button class="choice-btn" onclick="continueDialogue('${nextNode}')"><span class="choice-text">Continue</span></button>`;
+                    choicesEl.innerHTML = `<button class="choice-btn" onclick="continueDialogue('${nextNode}')"><span class="choice-key">1</span><span class="choice-text">Continue →</span></button>`;
                 } else {
                     gameState.gameEnded = true;
                     showStatsReveal();
                     choicesEl.innerHTML = '';
                     document.getElementById('endSummary').style.display = 'block';
-                    document.getElementById('endSummary').innerHTML = `<div class="end-summary"><h3>🎭 End of Journey</h3><p>You made <strong>${gameState.decisionCount}</strong> choices.</p><div class="end-actions"><button class="btn" onclick="openReportModal()">View Report</button><button class="btn btn-primary" onclick="openTreeModal()">View Decision Tree</button></div></div>`;
+                    document.getElementById('endSummary').innerHTML = `<div class="end-summary"><h3>End of this thread</h3><p>You worked through <strong>${gameState.decisionCount}</strong> decisions on this case.</p><div class="end-actions"><button class="btn" onclick="openReportModal()">After-action report</button><button class="btn btn-primary" onclick="openTreeModal()">See your path</button></div></div>`;
                 }
             }
 
@@ -1265,7 +1303,7 @@
             document.getElementById('revealSubtitle').textContent = `${gameState.decisionCount} decisions • ${document.getElementById('timeElapsed').textContent} elapsed`;
             let html = '';
             if (gameState.dialogueData?.approvalTypes?.length) {
-                html += '<div class="reveal-section"><div class="reveal-section-title">Approval Ratings</div>';
+                html += '<div class="reveal-section"><div class="reveal-section-title">Where You Stand</div>';
                 gameState.dialogueData.approvalTypes.forEach((t, i) => {
                     const val = gameState.approvals[t.id] || 0;
                     const maxVal = Math.max(10, ...Object.values(gameState.approvals));
@@ -1276,14 +1314,14 @@
             }
             const statKeys = Object.keys(gameState.stats);
             if (statKeys.length) {
-                html += '<div class="reveal-section"><div class="reveal-section-title">Acquired Traits</div>';
+                html += '<div class="reveal-section"><div class="reveal-section-title">Findings</div>';
                 statKeys.forEach((k, i) => {
                     const v = gameState.stats[k];
                     html += `<div class="reveal-stat-item" style="animation-delay:${0.5 + i * 0.15}s"><span class="reveal-stat-label">${k}</span><span class="reveal-stat-value">${typeof v === 'number' ? (v > 0 ? '+' : '') + v : v}</span></div>`;
                 });
                 html += '</div>';
             }
-            html += `<div class="reveal-section"><div class="reveal-section-title">Card Types</div><div class="reveal-stat-item" style="animation-delay:0.8s"><span class="reveal-stat-label"><span class="card-count-marker question" style="display:inline-flex;width:16px;height:16px;font-size:0.7rem;margin-right:6px">?</span> Questions</span><span class="reveal-stat-value">${gameState.questionCount}</span></div><div class="reveal-stat-item" style="animation-delay:0.95s"><span class="reveal-stat-label"><span class="card-count-marker decision" style="display:inline-flex;width:16px;height:16px;font-size:0.7rem;margin-right:6px">!</span> Decisions</span><span class="reveal-stat-value">${gameState.decisionTypeCount}</span></div></div>`;
+            html += `<div class="reveal-section"><div class="reveal-section-title">Your Flags</div><div class="reveal-stat-item" style="animation-delay:0.8s"><span class="reveal-stat-label"><span class="card-count-marker question" style="display:inline-flex;width:16px;height:16px;font-size:0.7rem;margin-right:6px">?</span> Questions to follow up</span><span class="reveal-stat-value">${gameState.questionCount}</span></div><div class="reveal-stat-item" style="animation-delay:0.95s"><span class="reveal-stat-label"><span class="card-count-marker decision" style="display:inline-flex;width:16px;height:16px;font-size:0.7rem;margin-right:6px">!</span> Key decisions</span><span class="reveal-stat-value">${gameState.decisionTypeCount}</span></div></div>`;
             document.getElementById('revealStats').innerHTML = html;
             document.getElementById('revealModal').classList.add('active');
             setTimeout(() => document.querySelectorAll('.reveal-bar-fill').forEach(el => el.style.width = el.dataset.width + '%'), 100);
@@ -1630,8 +1668,8 @@
             // Summary stats
             html += '<div class="report-summary">';
             html += `<div class="report-stat-box"><div class="report-stat-value">${gameState.decisionCount}</div><div class="report-stat-label">Decisions</div></div>`;
-            html += `<div class="report-stat-box"><div class="report-stat-value">${gameState.questionCount}</div><div class="report-stat-label">Questions (?)</div></div>`;
-            html += `<div class="report-stat-box"><div class="report-stat-value">${gameState.decisionTypeCount}</div><div class="report-stat-label">Discussions (!)</div></div>`;
+            html += `<div class="report-stat-box"><div class="report-stat-value">${gameState.questionCount}</div><div class="report-stat-label">Questions flagged</div></div>`;
+            html += `<div class="report-stat-box"><div class="report-stat-value">${gameState.decisionTypeCount}</div><div class="report-stat-label">Decisions flagged</div></div>`;
             html += `<div class="report-stat-box"><div class="report-stat-value">${document.getElementById('timeElapsed').textContent}</div><div class="report-stat-label">Time</div></div>`;
             html += '</div>';
 
@@ -1640,7 +1678,7 @@
             const hasStats = Object.keys(gameState.stats).length > 0;
 
             if (hasApprovals || hasStats) {
-                html += '<div class="report-section"><div class="report-section-title">Final Scores</div><div class="report-scores">';
+                html += '<div class="report-section"><div class="report-section-title">Where You Stand</div><div class="report-scores">';
                 if (hasApprovals) {
                     gameState.dialogueData.approvalTypes.forEach(t => {
                         const val = gameState.approvals[t.id] || 0;
@@ -1708,8 +1746,12 @@
             if (!file) return;
             const reader = new FileReader();
             reader.onload = ev => {
-                try { loadDialogueData(JSON.parse(ev.target.result)); }
-                catch (err) { alert('Error parsing JSON: ' + err.message); }
+                try {
+                    loadDialogueData(JSON.parse(ev.target.result));
+                    closeStartScreen();
+                    document.getElementById('printSummaryBtn').style.display = '';
+                }
+                catch (err) { alert("That file couldn't be read as a case. Please check it's a valid case JSON.\n\n(" + err.message + ')'); }
             };
             reader.readAsText(file);
             e.target.value = '';
@@ -1746,11 +1788,16 @@
 
         document.addEventListener('keydown', e => {
             if (e.target.tagName === 'TEXTAREA') return;
+            // When the case menu is open, keep number/arrow keys from leaking to the game behind it.
+            if (document.getElementById('startModal').classList.contains('active')) {
+                if (e.key === 'Escape' && gameState.dialogueData) closeStartScreen();
+                return;
+            }
             const num = parseInt(e.key);
             if (num >= 1 && num <= 9) document.querySelectorAll('.choice-btn')[num - 1]?.click();
             if (e.key === 'ArrowLeft') goBack();
             if (e.key === 'ArrowRight') goForward();
-            if (e.key === 'Escape') { closeTreeModal(); closeRevealModal(); }
+            if (e.key === 'Escape') { closeTreeModal(); closeRevealModal(); closeReportModal(); }
         });
 
         document.getElementById('treeModal').addEventListener('click', e => e.target.classList.contains('modal-overlay') && closeTreeModal());
@@ -1767,7 +1814,7 @@
             const label = document.getElementById('progressLabel');
             const container = document.getElementById('progressBarContainer');
             if (bar) bar.style.width = pct + '%';
-            if (label) label.textContent = `${visitedCount} / ${totalNodes} nodes visited`;
+            if (label) label.textContent = `${visitedCount} / ${totalNodes} scenes explored`;
             if (container) container.style.display = '';
         }
 
@@ -1862,6 +1909,141 @@ ${statRows ? `<h2>Acquired Traits / Stats</h2><table><thead><tr><th>Trait</th><t
             const btn = document.getElementById('shortcutsBtn');
             if (panel && !panel.contains(e.target) && e.target !== btn) panel.style.display = 'none';
         });
+
+        // ─── Built-in cases (so the simulation runs with zero setup) ─────────────
+        // A short orientation plus one full point-source foodborne outbreak.
+        const CASE_HARVEST = {
+            title: "The Harvest Dinner",
+            startNode: "arrival",
+            approvalTypes: [
+                { id: "trust", name: "Community Trust", initial: 3 },
+                { id: "team", name: "Team Confidence", initial: 3 }
+            ],
+            nodes: [
+                { id: "arrival", speaker: "Field Notebook", text: "7:40 a.m. The Millbrook community clinic smells of coffee and disinfectant. Overnight, the on-call nurse logged more than a dozen people with sudden vomiting and cramps — and nearly all of them were at last night’s Harvest Dinner fundraiser.\n\nYou’re the county’s outbreak investigator. Nurse Adeyemi spots you and waves you over.", next: "meet_nurse" },
+                { id: "meet_nurse", speaker: "Nurse Adeyemi", text: "“Thanks for coming so fast. I’ve been up all night with this. Where do you want to start?”", choices: [
+                    { text: "“Walk me through what you’ve seen — start with your very first patient.”", type: "question", next: "nurse_report", effects: { approvals: { trust: 1, team: 1 } } },
+                    { text: "“How many are dead?”", next: "nurse_blunt", effects: { approvals: { trust: -1 } } },
+                    { text: "“Have you called the news yet? People need to know.”", next: "nurse_media", effects: { approvals: { team: -1 } } }
+                ] },
+                { id: "nurse_blunt", speaker: "Nurse Adeyemi", text: "She blinks. “Nobody has died. It’s frightening enough without leading with that.” You feel the room cool a few degrees.", next: "nurse_report" },
+                { id: "nurse_media", speaker: "Nurse Adeyemi", text: "“Before we even know what this is? Let’s find out what happened first — then we’ll know what to say.” Fair point.", next: "nurse_report" },
+                { id: "nurse_report", speaker: "Nurse Adeyemi", text: "“Okay. Eighteen people so far. Vomiting, cramps, some diarrhea — it hit hard and fast, mostly late last night. A couple came in dehydrated, but everyone’s stable. The one thread they all share: the Harvest Dinner at the Grange hall.”", next: "case_def_intro" },
+                { id: "case_def_intro", speaker: "Nurse Adeyemi", text: "“About three hundred people were at that dinner, and my phone will not stop ringing. What do we do first?”", choices: [
+                    { text: "“Let’s agree on a case definition — exactly who counts as a case — before we count anyone.”", type: "decision", next: "casedef_good", effects: { approvals: { team: 1 }, stats: { "Case definition": "drafted" } } },
+                    { text: "“Close the Grange hall right now.”", next: "casedef_rush", effects: { approvals: { team: -1 } } },
+                    { text: "“Tell everyone who attended to go get tested today.”", next: "casedef_rush2", effects: { approvals: { trust: -1 } } }
+                ] },
+                { id: "casedef_rush", speaker: "Nurse Adeyemi", text: "“Shut it down on what evidence? If we’re wrong, we’ve cried wolf — and we still won’t know the cause.” She’s right: act on knowledge, not panic.", next: "casedef_good" },
+                { id: "casedef_rush2", speaker: "Nurse Adeyemi", text: "“Three hundred people flooding clinics for tests we can’t run today? We’d burn through their trust by lunch.” Point taken — aim the effort where it counts.", next: "casedef_good" },
+                { id: "casedef_good", speaker: "Field Notebook", text: "You draft a working case definition on the whiteboard:\n\nAny Harvest Dinner attendee with vomiting or diarrhea starting after the meal, from last night through today.\n\nSimple, testable, and easy to revise later. Nurse Adeyemi nods. “Now that’s a place to start.”", next: "patient_intro" },
+                { id: "patient_intro", speaker: "Field Notebook", text: "In an exam room, Marcus — 34, pale, nursing a flat ginger ale — agrees to talk.", choices: [
+                    { text: "“I’m sorry you’re feeling rough. Mind if I ask a few questions so we can stop this from spreading?”", next: "patient_history", effects: { approvals: { trust: 1 } } },
+                    { text: "“State your name, age, and the time your symptoms started.”", next: "patient_cold", effects: { approvals: { trust: -1 } } }
+                ] },
+                { id: "patient_cold", speaker: "Marcus", text: "“…Sure. It’s like that, huh.” He answers, but the warmth is gone. People tell you more when you treat them like people.", next: "patient_history" },
+                { id: "patient_history", speaker: "Marcus", text: "“I felt fine all day. We ate around seven. By ten I was on the bathroom floor — throwing up, cramping, the works. Long night.”", choices: [
+                    { text: "“Think back to the meal — what exactly did you eat and drink?”", type: "question", next: "food_history", effects: { approvals: { team: 1 } } },
+                    { text: "“Only about three hours from the meal to feeling sick — that’s fast. Noted.”", type: "question", next: "incubation", effects: { approvals: { team: 1 } } }
+                ] },
+                { id: "food_history", speaker: "Marcus", text: "“Let’s see… roast chicken, green beans, a dinner roll, some salad. And the tiramisu at the end — that dessert was everywhere, people were going back for seconds.” You write it down, dish by dish.", next: "incubation" },
+                { id: "incubation", speaker: "Field Notebook", text: "The picture is sharpening: healthy people, one shared meal, symptoms just a few hours later. A short incubation with heavy vomiting points away from the bugs that take days to brew — and toward a toxin already in the food. You underline the word tiramisu and go find the organizer.", next: "organizer_intro" },
+                { id: "organizer_intro", speaker: "Ms. Delgado", text: "The event organizer meets you in the corridor, wringing her hands. “Is this our fault? We tried so hard to do it right.”", choices: [
+                    { text: "“No blame here — I just need your help. Could I get the guest list and the full menu?”", next: "menu_reveal", effects: { approvals: { trust: 1, team: 1 } } },
+                    { text: "“I’ll need all of your records. Now.”", next: "menu_tense", effects: { approvals: { trust: -1 } } }
+                ] },
+                { id: "menu_tense", speaker: "Ms. Delgado", text: "She stiffens, then fetches a folder without a word. You get the records — but you’ve spent goodwill you may want back later.", next: "menu_reveal" },
+                { id: "menu_reveal", speaker: "Ms. Delgado", text: "“Everything was donated or homemade. The chicken came from a caterer; the sides from volunteers. The tiramisu… one of the kitchen crew made it fresh yesterday morning. It’s always the first thing to go.” She pauses. “It sat out on the dessert table most of the evening.”", next: "chef_intro" },
+                { id: "chef_intro", speaker: "Chef Boone", text: "In the kitchen, Chef Boone folds his arms. “I ran a clean line for twenty years. I know what you’re about to ask.”", choices: [
+                    { text: "“Then you know I’m tracing the food, not blaming the cook. Walk me through the tiramisu.”", next: "chef_story", effects: { approvals: { trust: 1 } } },
+                    { text: "“Your dessert put people in the hospital. What did you do wrong?”", next: "chef_tense", effects: { approvals: { trust: -1, team: -1 } } }
+                ] },
+                { id: "chef_tense", speaker: "Chef Boone", text: "“I don’t have to talk to you.” It takes ten minutes to coax him back to the table. Accusations close doors; curiosity opens them.", next: "chef_story" },
+                { id: "chef_story", speaker: "Chef Boone", text: "He exhales. “Marta made it yesterday morning — mascarpone, raw egg, fresh cream. Fridge was jammed with the mains, so it sat on the counter, then out on the dessert table from six until close. And… she had a bandage on her thumb. Kitchen cut from the day before.” He goes quiet.", next: "hypothesis" },
+                { id: "hypothesis", speaker: "Field Notebook", text: "The pieces line up: a cream dessert, hours in the warm, handled by someone with a skin wound — a textbook setup for staph toxin. What’s your read?", choices: [
+                    { text: "“Working theory: a point-source toxin, most likely the dessert. Let’s build a line list and compare who ate what.”", type: "decision", next: "lab_intro", effects: { approvals: { team: 1 }, stats: { "Working hypothesis": "Staph toxin — the dessert" } } },
+                    { text: "“Has to be the water supply. Let’s test the taps.”", next: "hypothesis_fix", effects: { approvals: { team: -1 } } }
+                ] },
+                { id: "hypothesis_fix", speaker: "Nurse Adeyemi", text: "“Water wouldn’t hit only the dinner guests, three hours after dessert. The meal is our common thread.” You nod and refocus on the food.", next: "lab_intro" },
+                { id: "lab_intro", speaker: "Lab Liaison", text: "The state lab has limited capacity today. “Tell me what to run,” the liaison says. “I can’t test everything.”", choices: [
+                    { text: "“Save the leftover tiramisu, and get stool from a few clear cases — screen for staph enterotoxin. Targeted, not scattershot.”", next: "comms", effects: { approvals: { team: 1 } } },
+                    { text: "“Run every test on every sample. Spare no expense.”", next: "comms_costly", effects: { approvals: { team: -1 } } }
+                ] },
+                { id: "comms_costly", speaker: "Lab Liaison", text: "“That buries us for a week and blows the budget on noise.” Together you trim it to the handful of tests that will actually answer the question.", next: "comms" },
+                { id: "comms", speaker: "Field Notebook", text: "By noon, three hundred anxious people want to know whether it’s safe to eat the leftovers. Ms. Delgado asks what to tell them. What’s your message?", choices: [
+                    { text: "“The honest version: a likely food-linked toxin, probably the dessert, and no sign it’s still spreading. Throw out the leftovers, watch for symptoms, call us if it worsens.”", type: "decision", next: "wrap_good", effects: { approvals: { trust: 1, team: 1 } } },
+                    { text: "“Tell them it’s just a mild stomach bug going around. Keep everyone calm.”", next: "comms_bad", effects: { approvals: { trust: -1 } } },
+                    { text: "“Warn that a dangerous outbreak is spreading and everyone is at risk.”", next: "comms_bad", effects: { approvals: { trust: -1 } } }
+                ] },
+                { id: "comms_bad", speaker: "Nurse Adeyemi", text: "“People can handle the truth — what they can’t forgive is being misled, or scared for no reason.” You rewrite the message: clear, honest, and useful.", next: "wrap_good" },
+                { id: "wrap_good", speaker: "Field Notebook", text: "Two days later, the lab confirms it: staphylococcal enterotoxin in the leftover tiramisu, and in two patient samples. A cream dessert, left warm for hours, handled with a cut hand — exactly the story the interviews had already told you.\n\nEveryone recovered. And because you traced the food instead of guessing, the fix was almost boring: better refrigeration, and a simple rule to keep anyone with an open wound off the food line.\n\nThat’s the whole job — patient questions, an honest case definition, and the discipline to follow the evidence to its source." }
+            ]
+        };
+
+        const CASE_ORIENTATION = {
+            title: "Orientation",
+            startNode: "o_start",
+            approvalTypes: [],
+            nodes: [
+                { id: "o_start", speaker: "Field Notebook", text: "A two-minute warm-up before your first case. You’ll read a bit of the scene, then choose what to say or do. Ready?", choices: [
+                    { text: "Ready — how do I choose?", next: "o_choices" }
+                ] },
+                { id: "o_choices", speaker: "Guide", text: "Every option below is a button. Click it, or just press its number key — 1, 2, 3. Give it a try now: press 1, or click the option below.", choices: [
+                    { text: "Done. What are the ? and ! buttons up top?", type: "both", next: "o_marks" }
+                ] },
+                { id: "o_marks", speaker: "Guide", text: "Those are your flags, at the top-right of each scene. Tap ? for “a question I still want answered,” and ! for “this was a real decision.” They’re just your notes — they show up in your debrief at the end. Try tapping one now.", choices: [
+                    { text: "Got it. Anything else?", next: "o_tools" }
+                ] },
+                { id: "o_tools", speaker: "Guide", text: "Two last things. The sidebar tracks your progress and history — click any past moment to revisit it. And the A / A / A and moon buttons up top change the text size and switch light or dark. That’s the whole interface.", choices: [
+                    { text: "Great — take me to a real case.", next: "o_done" }
+                ] },
+                { id: "o_done", speaker: "Field Notebook", text: "You’re ready. Open ☰ Cases at the top any time to pick a scenario. See you in the field." }
+            ]
+        };
+
+        const BUILT_IN_SCENARIOS = [
+            { badge: "Featured case", meta: "15–20 min", desc: "A community fundraiser ends with two dozen guests violently ill. Interview the nurse, a patient, the organizer, and the cook to trace a classic point-source foodborne outbreak.", data: CASE_HARVEST },
+            { badge: "Start here", meta: "2 min", desc: "New to the simulation? A quick, friendly walkthrough of how to read scenes, make choices, and flag questions and decisions.", data: CASE_ORIENTATION }
+        ];
+
+        function renderStartScreen() {
+            document.getElementById('caseGrid').innerHTML = BUILT_IN_SCENARIOS.map((s, i) => `
+                <button class="case-card" onclick="startScenario(${i})">
+                    <div class="case-card-top">
+                        <span class="case-card-name">${s.data.title}</span>
+                        <span class="case-badge">${s.badge}</span>
+                        <span class="case-meta">${s.meta}</span>
+                    </div>
+                    <div class="case-card-desc">${s.desc}</div>
+                    <div class="case-card-go">▶ Begin</div>
+                </button>
+            `).join('');
+        }
+
+        function startScenario(i) {
+            const s = BUILT_IN_SCENARIOS[i];
+            if (!s) return;
+            loadDialogueData(JSON.parse(JSON.stringify(s.data)));
+            document.getElementById('printSummaryBtn').style.display = '';
+            closeStartScreen();
+        }
+
+        function openStartScreen() {
+            renderStartScreen();
+            document.getElementById('startModal').classList.add('active');
+        }
+
+        function closeStartScreen() {
+            document.getElementById('startModal').classList.remove('active');
+        }
+
+        // Let players dismiss the menu by clicking the backdrop — but only once a case is loaded.
+        document.getElementById('startModal').addEventListener('click', e => {
+            if (e.target.classList.contains('modal-overlay') && gameState.dialogueData) closeStartScreen();
+        });
+
+        // Show the briefing on first open.
+        openStartScreen();
     </script>
 </body>
 </html>
