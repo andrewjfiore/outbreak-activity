@@ -1,5 +1,7 @@
 # 🦠 outbreak-activity
 
+> **LLM coding experiment.** This project was built mostly by AI coding agents as an experiment. It is not maintained, reviewed, or tested for real use. Do not rely on it for anything that matters.
+
 Interactive outbreak investigation simulation: interviews, sample collection, and line list creation.
 
 > **New?** Read [START-HERE.md](START-HERE.md)
